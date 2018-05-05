@@ -82,6 +82,9 @@ SPIDesc SPIDeviceManager::device_table[] = {
     // ICM20608 on the ACCEL_MAG
     SPIDesc("icm20608-am",   PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_ACCEL_MAG, SPIDEV_MODE3, 500*KHZ, 8*MHZ),
 #endif
+#if defined(PX4_SPIDEV_LSM9DS0_XM)
+    SPIDesc("lsm9ds0_am",   PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_LSM9DS0_XM, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
+#endif
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_PX4_V4 || CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_PX4_INV1
     SPIDesc("ms5611_int",   PX4_SPI_BUS_BARO, (spi_dev_e)PX4_SPIDEV_BARO, SPIDEV_MODE3, 20*MHZ, 20*MHZ),
 #ifdef PX4_SPIDEV_HMC
@@ -92,6 +95,9 @@ SPIDesc SPIDeviceManager::device_table[] = {
 #ifdef PX4_SPIDEV_BARO
     SPIDesc("ms5611",       PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_BARO, SPIDEV_MODE3, 20*MHZ, 20*MHZ),
 #endif
+#ifdef PX4_SPIDEV_BMP280
+    SPIDesc("bmp280",       PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_BMP280, SPIDEV_MODE3, 20*MHZ, 20*MHZ),
+#endif
 #if defined(PX4_SPIDEV_ACCEL_MAG)
     SPIDesc("lsm9ds0_am",   PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_ACCEL_MAG, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
 #endif
@@ -100,6 +106,12 @@ SPIDesc SPIDeviceManager::device_table[] = {
 #endif
 #if defined(PX4_SPIDEV_GYRO)
     SPIDesc("lsm9ds0_g",    PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_GYRO, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
+#endif
+#if defined(PX4_SPIDEV_LSM9DS0_G)
+    SPIDesc("lsm9ds0_g",    PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_LSM9DS0_G, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
+#endif
+#if defined(PX4_SPIDEV_LSM9DS1_AG)
+    SPIDesc("lsm9ds1_ag",    PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_LSM9DS1_AG, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
 #endif
 #ifdef PX4_SPIDEV_EXT_GYRO
     SPIDesc("lsm9ds0_ext_g",PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_EXT_GYRO, SPIDEV_MODE3, 11*MHZ, 11*MHZ),

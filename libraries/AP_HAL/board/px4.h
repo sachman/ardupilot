@@ -60,11 +60,15 @@
 #define HAL_BARO_MS5611_SPI_INT_NAME "ms5611_int"
 #define HAL_BARO_MS5611_SPI_EXT_NAME "ms5611_ext"
 
+#define HAL_BARO_BMP280_NAME "bmp280"
+
 #define HAL_INS_MPU60x0_NAME "mpu6000"
 #define HAL_INS_MPU60x0_EXT_NAME "mpu6000_ext"
 
 #define HAL_INS_LSM9DS0_G_NAME "lsm9ds0_g"
 #define HAL_INS_LSM9DS0_A_NAME "lsm9ds0_am"
+
+#define HAL_INS_LSM9DS1_AG_NAME "lsm9ds1_ag"
 
 #define HAL_INS_LSM9DS0_EXT_G_NAME "lsm9ds0_ext_g"
 #define HAL_INS_LSM9DS0_EXT_A_NAME "lsm9ds0_ext_am"
