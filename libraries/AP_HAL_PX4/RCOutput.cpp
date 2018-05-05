@@ -58,7 +58,7 @@ void PX4RCOutput::init()
         _outputs[i].pwm_sub = orb_subscribe_multi(ORB_ID(actuator_outputs), i);
     }
 
-#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V4)
+#if !defined(CONFIG_ARCH_BOARD_PX4FMU_V4)|| !defined(CONFIG_ARCH_BOARD_PX4FMU_INV1)
     struct stat st;
     // don't try and open px4fmu unless there is a px4io. Otherwise we
     // can end up opening the same device twice

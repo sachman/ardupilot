@@ -147,7 +147,7 @@ void PX4Storage::_timer_tick(void)
 #if !USE_FLASH_STORAGE
 void PX4Storage::bus_lock(bool lock)
 {
-#if defined (CONFIG_ARCH_BOARD_PX4FMU_V4)
+#if defined (CONFIG_ARCH_BOARD_PX4FMU_V4) || defined(CONFIG_ARCH_BOARD_PX4FMU_INV1)
     /*
       this is needed on Pixracer where the ms5611 may be on the same
       bus as FRAM, and the NuttX ramtron driver does not go via the

@@ -65,7 +65,7 @@ extern "C" int oreoled_main(int, char **);
 bool OreoLED_PX4::init()
 {
 
-#if defined(CONFIG_ARCH_BOARD_PX4FMU_V2)
+#if defined(CONFIG_ARCH_BOARD_PX4FMU_V2)|| defined(CONFIG_ARCH_BOARD_PX4FMU_INV1)
     if (!AP_BoardConfig::px4_start_driver(oreoled_main, "oreoled", "start autoupdate")) {
         hal.console->printf("Unable to start oreoled driver\n");
     } else {

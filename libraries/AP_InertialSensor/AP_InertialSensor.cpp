@@ -726,6 +726,12 @@ AP_InertialSensor::detect_backends(void)
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_ROLL_180_YAW_90));
         break;
 
+    case AP_BoardConfig::PX4_BOARD_FMUINV1:
+        _fast_sampling_mask.set_default(3);
+        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_ICM20608_NAME), ROTATION_ROLL_180_YAW_90));
+        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_ROLL_180_YAW_90));
+        break;
+
     case AP_BoardConfig::PX4_BOARD_PIXHAWK_PRO:
         _fast_sampling_mask.set_default(3);
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_ICM20608_NAME), ROTATION_ROLL_180_YAW_90));

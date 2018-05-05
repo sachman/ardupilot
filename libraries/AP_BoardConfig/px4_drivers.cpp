@@ -319,6 +319,7 @@ void AP_BoardConfig::px4_setup_drivers(void)
     case PX4_BOARD_PH2SLIM:
     case PX4_BOARD_AEROFC:
     case PX4_BOARD_PIXHAWK_PRO:
+    case PX4_BOARD_FMUINV1:
         break;
     default:
         sensor_config_error("Unknown board type");
@@ -413,6 +414,8 @@ void AP_BoardConfig::px4_setup_peripherals(void)
 
 #if defined(CONFIG_ARCH_BOARD_PX4FMU_V1)
     const char *fmu_mode = "mode_serial";
+#elif defined(CONFIG_ARCH_BOARD_PX4FMU_INV1)
+	const char *fmu_mode = "mode_pwm";
 #elif defined(CONFIG_ARCH_BOARD_AEROFC_V1)
     const char *fmu_mode = "mode_rcin";
 #else
@@ -539,6 +542,9 @@ void AP_BoardConfig::px4_autodetect(void)
     // only one choice
     px4.board_type.set_and_notify(PX4_BOARD_PIXRACER);
     hal.console->printf("Detected Pixracer\n");
+#elif defined(CONFIG_ARCH_BOARD_PX4FMU_INV1)
+    px4.board_type.set_and_notify(PX4_BOARD_FMUINV1);
+    hal.console->printf("Detected fmu INV1\n");
 #elif defined(CONFIG_ARCH_BOARD_PX4FMU_V4PRO)
     // only one choice
     px4.board_type.set_and_notify(PX4_BOARD_PIXHAWK_PRO);
