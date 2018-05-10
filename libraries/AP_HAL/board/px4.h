@@ -117,11 +117,11 @@
 #ifndef HAL_PX4_HAVE_MTD_SUPPORT
 #define HAL_PX4_HAVE_MTD_SUPPORT 1
 #endif
-
+/*
 #ifndef HAL_PX4_HAVE_PX4IO
 #define HAL_PX4_HAVE_PX4IO 1
 #endif
-
+*/
 #ifndef HAL_PX4_HAVE_PWM_INPUT
 #define HAL_PX4_HAVE_PWM_INPUT 1
 #endif
