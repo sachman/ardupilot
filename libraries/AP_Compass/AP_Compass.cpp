@@ -21,6 +21,7 @@
 #include "AP_Compass_QMC5883L.h"
 #if HAL_WITH_UAVCAN
 #include "AP_Compass_UAVCAN.h"
+#include "AP_Compass_UAVCAN2.h"
 #endif
 #include "AP_Compass_MMC3416.h"
 #include "AP_Compass.h"
@@ -813,15 +814,24 @@ void Compass::_detect_backends(void)
 #endif
 
 #if HAL_WITH_UAVCAN
-    if (_driver_enabled(DRIVER_UAVCAN)) {
-        bool added;
-        do {
+
+    ADD_BACKEND(DRIVER_UAVCAN, new AP_Compass_UAVCAN(*this), "UAVCAN", true);
+    ADD_BACKEND(DRIVER_UAVCAN, new AP_Compass_UAVCAN2(*this), "UAVCAN", true);
+
+/*    if (_driver_enabled(DRIVER_UAVCAN)) {
+        bool added, added2;
+//        do {
             added = _add_backend(new AP_Compass_UAVCAN(*this), "UAVCAN", true);
+            added2 = _add_backend(new AP_Compass_UAVCAN2(*this), "UAVCAN", true);
+            if (added == added2){
+
+            }
+
             if (_backend_count == COMPASS_MAX_BACKEND || _compass_count == COMPASS_MAX_INSTANCES) {
                 return;
             }
-        } while (added);
-    }
+//        } while (added||added2);
+    }*/
 #endif
 
     if (_backend_count == 0 ||

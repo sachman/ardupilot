@@ -89,6 +89,12 @@ public:
     Mag_Info *find_mag_node(uint8_t node);
     void update_mag_state(uint8_t node);
 
+    uint8_t register_mag2_listener(AP_Compass_Backend* new_listener,
+                                  uint8_t preferred_channel);
+    void remove_mag2_listener(AP_Compass_Backend* rem_listener);
+    Mag_Info *find_mag2_node(uint8_t node);
+    void update_mag2_state(uint8_t node);
+
     // synchronization for RC output
     bool rc_out_sem_take();
     void rc_out_sem_give();
@@ -120,6 +126,12 @@ private:
     Mag_Info _mag_node_state[AP_UAVCAN_MAX_MAG_NODES];
     uint8_t _mag_listener_to_node[AP_UAVCAN_MAX_LISTENERS];
     AP_Compass_Backend* _mag_listeners[AP_UAVCAN_MAX_LISTENERS];
+
+    uint8_t _mag2_nodes[AP_UAVCAN_MAX_MAG_NODES];
+    uint8_t _mag2_node_taken[AP_UAVCAN_MAX_MAG_NODES];
+    Mag_Info _mag2_node_state[AP_UAVCAN_MAX_MAG_NODES];
+    uint8_t _mag2_listener_to_node[AP_UAVCAN_MAX_LISTENERS];
+    AP_Compass_Backend* _mag2_listeners[AP_UAVCAN_MAX_LISTENERS];
 
     struct {
         uint16_t pulse;
