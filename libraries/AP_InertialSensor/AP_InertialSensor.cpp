@@ -692,12 +692,18 @@ AP_InertialSensor::detect_backends(void)
     _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME)));
 #elif HAL_INS_DEFAULT == HAL_INS_PX4 || HAL_INS_DEFAULT == HAL_INS_VRBRAIN
 
+    ::printf("AUS Debug: Going to get board type now\n");
     switch (AP_BoardConfig::get_board_type()) {
     case AP_BoardConfig::PX4_BOARD_PX4V1:
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU60x0_NAME)));
         break;
 
     case AP_BoardConfig::PX4_BOARD_PIXHAWK:
+        ::printf("AUS Debug: Board type found to be PX4_BOARD_PIXHAWK\n");
+        /* AUS: Changed for porting purpose.
+         * V10 has only one accel, gyro and mag chip, which is MPU9250.
+         */
+#if 0
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU60x0_NAME), ROTATION_ROLL_180));
         _add_backend(AP_InertialSensor_LSM9DS0::probe(*this,
                                                       hal.spi->get_device(HAL_INS_LSM9DS0_G_NAME),
@@ -705,6 +711,8 @@ AP_InertialSensor::detect_backends(void)
                                                       ROTATION_ROLL_180,
                                                       ROTATION_ROLL_180_YAW_270,
                                                       ROTATION_PITCH_180));
+#endif
+        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_YAW_270));
         break;
 
     case AP_BoardConfig::PX4_BOARD_PIXHAWK2:

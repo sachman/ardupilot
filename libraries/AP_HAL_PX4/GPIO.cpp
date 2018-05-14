@@ -62,8 +62,8 @@ void PX4GPIO::init()
         hal.console->printf("GPIO: Unable to setup GPIO_1\n");
     }
 #endif
-
-#ifdef PX4IO_DEVICE_PATH
+/* AUS: Changed for porting purposes */
+#if defined(PX4IO_DEVICE_PATH) && defined(HAL_PX4_HAVE_PX4IO)
     // also try to setup for the relay pins on the IO board
     _gpio_io_fd = open(PX4IO_DEVICE_PATH, O_RDWR);
     if (_gpio_io_fd == -1) {
