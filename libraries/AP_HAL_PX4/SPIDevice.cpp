@@ -90,7 +90,8 @@ SPIDesc SPIDeviceManager::device_table[] = {
 #endif
 #endif
 #ifdef PX4_SPIDEV_BARO
-    SPIDesc("ms5611",       PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_BARO, SPIDEV_MODE3, 20*MHZ, 20*MHZ),
+	/* AUS: Changed for porting purposes; Baro MS5611 at SPI4 bus on v10 board */
+    SPIDesc("ms5611",       PX4_SPI_BUS_BARO, (spi_dev_e)PX4_SPIDEV_BARO, SPIDEV_MODE3, 20*MHZ, 20*MHZ),
 #endif
 #if defined(PX4_SPIDEV_ACCEL_MAG)
     SPIDesc("lsm9ds0_am",   PX4_SPI_BUS_SENSORS, (spi_dev_e)PX4_SPIDEV_ACCEL_MAG, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
