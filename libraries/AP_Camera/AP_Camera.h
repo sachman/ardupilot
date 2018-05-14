@@ -35,7 +35,8 @@ public:
     ///
     AP_Camera(AP_Relay *obj_relay) :
         _trigger_counter(0),    // count of number of cycles shutter has been held open
-        _image_index(0)
+        _image_index(0),
+		_camera_switched_on(false)
     {
 		AP_Param::setup_object_defaults(this, var_info);
         _apm_relay = obj_relay;
@@ -70,6 +71,10 @@ public:
     // return true if we are using a feedback pin
     bool using_feedback_pin(void) const { return _feedback_pin > 0; }
     
+    void switch_on(void);
+
+    void switch_off(void);
+
     static const struct AP_Param::GroupInfo        var_info[];
 
 private:
@@ -79,6 +84,7 @@ private:
     AP_Int16        _servo_on_pwm;      // PWM value to move servo to when shutter is activated
     AP_Int16        _servo_off_pwm;     // PWM value to move servo to when shutter is deactivated
     uint8_t         _trigger_counter;   // count of number of cycles shutter has been held open
+    uint8_t         _on_counter;
     AP_Relay       *_apm_relay;         // pointer to relay object from the base class Relay.
 
     void            servo_pic();        // Servo operated camera
@@ -103,6 +109,7 @@ private:
 
     // this is set to 1 when camera trigger pin has fired
     static volatile bool   _camera_triggered;
+    bool   _camera_switched_on;
     bool            _timer_installed:1;
     uint8_t         _last_pin_state;
 };

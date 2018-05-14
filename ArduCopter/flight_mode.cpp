@@ -205,6 +205,7 @@ void Copter::update_flight_mode()
 
         case LOITER:
             loiter_run();
+            camera.switch_off();
             break;
 
         case GUIDED:
@@ -217,6 +218,7 @@ void Copter::update_flight_mode()
 
         case RTL:
             rtl_run();
+            camera.switch_off();
             break;
 
         case DRIFT:

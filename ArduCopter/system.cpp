@@ -304,6 +304,9 @@ void Copter::init_ardupilot()
     reset_control_switch();
     init_aux_switches();
 
+    // Logger Initialisation
+    init_logger_stat_pin();
+
     startup_INS_ground();
 
     // set landed flags
@@ -336,6 +339,18 @@ void Copter::init_ardupilot()
     ap.initialised = true;
 }
 
+void Copter::init_logger_stat_pin(void)
+{
+    int8_t dpin = hal.gpio->analogPinToDigitalPin(50);  //TODO: make parameter
+    if (dpin == -1) {
+        return;
+    }
+    // ensure we are in input mode
+    hal.gpio->pinMode(dpin, HAL_GPIO_INPUT);
+
+    // enable pullup
+    hal.gpio->write(dpin, 1);
+}
 
 //******************************************************************************
 //This function does all the calibrations, etc. that we need during a ground start

@@ -127,6 +127,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(dataflash_periodic,    400,    300),
     SCHED_TASK(perf_update,           0.1,    75),
     SCHED_TASK(read_receiver_rssi,    10,     75),
+	SCHED_TASK(update_logger_stat,      1,    100),
     SCHED_TASK(rpm_update,            10,    200),
     SCHED_TASK(compass_cal_update,   100,    100),
     SCHED_TASK(accel_cal_update,      10,    100),
@@ -171,6 +172,8 @@ void Copter::setup()
     StorageManager::set_layout_copter();
 
     init_ardupilot();
+
+    camera.switch_off();
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks));
@@ -641,6 +644,30 @@ void Copter::update_altitude()
     // write altitude info to dataflash logs
     if (should_log(MASK_LOG_CTUN)) {
         Log_Write_Control_Tuning();
+    }
+}
+
+void Copter::update_logger_stat(void)
+{
+
+    mavlink_rover_logger_status_t logger_status;
+
+    if(hal.gpio->read(50)) {
+        logger_status.gps_fix = 1;
+        logger_status.cam_log_stat = 1;
+        for (uint8_t i=0; i<num_gcs; i++) {
+            if (gcs_chan[i].initialised) {
+                mavlink_msg_rover_logger_status_send_struct(gcs_chan[i].get_chan(), &logger_status);
+            }
+        }
+    } else {
+        logger_status.gps_fix = 0;
+        logger_status.cam_log_stat = 0;
+        for (uint8_t i=0; i<num_gcs; i++) {
+            if (gcs_chan[i].initialised) {
+                mavlink_msg_rover_logger_status_send_struct(gcs_chan[i].get_chan(), &logger_status);
+            }
+        }
     }
 }
 

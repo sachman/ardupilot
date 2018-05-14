@@ -180,6 +180,23 @@ AP_Camera::trigger_pic_cleanup()
                 break;
         }
     }
+
+    if (_on_counter) {
+        _on_counter--;
+    } else {
+        switch (_trigger_type) {
+            case AP_CAMERA_TRIGGER_TYPE_SERVO:
+                //RC_Channel_aux::set_radio(RC_Channel_aux::k_cam_trigger, _servo_off_pwm);
+                break;
+            case AP_CAMERA_TRIGGER_TYPE_RELAY:
+                if (_relay_on) {
+                    _apm_relay->off(1);
+                } else {
+                    _apm_relay->on(1);
+                }
+                break;
+        }
+    }
 }
 
 /// decode deprecated MavLink message that controls camera.
@@ -224,6 +241,13 @@ bool AP_Camera::control(float session, float zoom_pos, float zoom_step, float fo
     // take picture
     if (is_equal(shooting_cmd,1.0f)) {
         trigger_pic(false);
+        ret = true;
+    } else if (is_equal(session, 1.0f)) {
+        //turn on the camera
+        switch_on();
+        ret = true;
+    } else if (is_equal(session, 0.0f)) {
+        switch_off();
         ret = true;
     }
 
@@ -397,4 +421,50 @@ failed:
         hal.scheduler->register_timer_process(FUNCTOR_BIND_MEMBER(&AP_Camera::feedback_pin_timer, void));
     }
     _timer_installed = true;
+}
+
+void AP_Camera::switch_on(void){
+	if(_camera_switched_on){
+		return;
+	}
+    switch (_trigger_type)
+    {
+    case AP_CAMERA_TRIGGER_TYPE_SERVO:
+        return;                   // Servo operated camera --> do nothing
+        break;
+    case AP_CAMERA_TRIGGER_TYPE_RELAY:
+        if (_relay_on) {
+            _apm_relay->on(1);
+        } else {
+            _apm_relay->off(1);
+        }
+        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Camera: Swiched ON \n");
+        break;
+    }
+    _camera_switched_on = true;
+    _on_counter = constrain_int16(2*_trigger_duration*5,0,255);
+}
+
+void AP_Camera::switch_off(void){
+
+	if(!_camera_switched_on){
+		return;
+	}
+
+    switch (_trigger_type)
+    {
+    case AP_CAMERA_TRIGGER_TYPE_SERVO:
+        return;                   // Servo operated camera --> do nothing
+        break;
+    case AP_CAMERA_TRIGGER_TYPE_RELAY:
+        if (_relay_on) {
+            _apm_relay->on(1);
+        } else {
+            _apm_relay->off(1);
+        }
+        GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "Camera: Swiched OFF \n");
+        break;
+    }
+    _camera_switched_on = false;
+    _on_counter = constrain_int16(2*_trigger_duration*5,0,255);
 }
