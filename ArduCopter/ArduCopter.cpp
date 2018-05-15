@@ -74,6 +74,9 @@
 
 #include "Copter.h"
 
+#include "board_config.h"
+#include <stm32.h>
+
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
 /*
@@ -651,10 +654,12 @@ void Copter::update_logger_stat(void)
 {
 
     mavlink_rover_logger_status_t logger_status;
-
-    if(hal.gpio->read(50)) {
+    stm32_configgpio(GPIO_GPIO0_INPUT);
+    if(stm32_gpioread(GPIO_GPIO0_INPUT)) {
         logger_status.gps_fix = 1;
         logger_status.cam_log_stat = 1;
+        logger_status.ppk_log_stat = stm32_gpioread(GPIO_GPIO0_INPUT);
+        logger_status.last_log_stat = stm32_gpioread(50);
         for (uint8_t i=0; i<num_gcs; i++) {
             if (gcs_chan[i].initialised) {
                 mavlink_msg_rover_logger_status_send_struct(gcs_chan[i].get_chan(), &logger_status);
@@ -663,6 +668,8 @@ void Copter::update_logger_stat(void)
     } else {
         logger_status.gps_fix = 0;
         logger_status.cam_log_stat = 0;
+        logger_status.ppk_log_stat = stm32_gpioread(GPIO_GPIO0_INPUT);
+        logger_status.last_log_stat = stm32_gpioread(50);
         for (uint8_t i=0; i<num_gcs; i++) {
             if (gcs_chan[i].initialised) {
                 mavlink_msg_rover_logger_status_send_struct(gcs_chan[i].get_chan(), &logger_status);
