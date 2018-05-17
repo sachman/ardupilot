@@ -1018,32 +1018,36 @@ void GCS_MAVLINK::send_scaled_pressure(AP_Baro &barometer)
 {
     uint32_t now = AP_HAL::millis();
     float pressure = barometer.get_pressure(0);
+    float baro_alt = barometer.get_altitude(0);
+
     mavlink_msg_scaled_pressure_send(
         chan,
         now,
         pressure*0.01f, // hectopascal
-        (pressure - barometer.get_ground_pressure(0))*0.01f, // hectopascal
+        baro_alt, //(pressure - barometer.get_ground_pressure(0))*0.01f, // hectopascal
         barometer.get_temperature(0)*100); // 0.01 degrees C
 
     if (barometer.num_instances() > 1 &&
         HAVE_PAYLOAD_SPACE(chan, SCALED_PRESSURE2)) {
         pressure = barometer.get_pressure(1);
+        baro_alt = barometer.get_altitude(1);
         mavlink_msg_scaled_pressure2_send(
             chan,
             now,
             pressure*0.01f, // hectopascal
-            (pressure - barometer.get_ground_pressure(1))*0.01f, // hectopascal
+			baro_alt, //(pressure - barometer.get_ground_pressure(1))*0.01f, // hectopascal
             barometer.get_temperature(1)*100); // 0.01 degrees C        
     }
 
     if (barometer.num_instances() > 2 &&
         HAVE_PAYLOAD_SPACE(chan, SCALED_PRESSURE3)) {
         pressure = barometer.get_pressure(2);
+        baro_alt = barometer.get_altitude(2);
         mavlink_msg_scaled_pressure3_send(
             chan,
             now,
             pressure*0.01f, // hectopascal
-            (pressure - barometer.get_ground_pressure(2))*0.01f, // hectopascal
+			baro_alt, //(pressure - barometer.get_ground_pressure(2))*0.01f, // hectopascal
             barometer.get_temperature(2)*100); // 0.01 degrees C        
     }
 }
