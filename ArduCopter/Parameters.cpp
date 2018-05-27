@@ -1004,6 +1004,15 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(visual_odom, "VISO", 18, ParametersG2, AP_VisualOdom),
 #endif
 
+	// @Param: LAND_ALT_LOW
+	// @DisplayName: Land alt low
+	// @Description: Altitude during Landing at which vehicle slows to LAND_SPEED
+	// @Units: cm
+	// @Range: 100 10000
+	// @Increment: 10
+	// @User: Advanced
+	AP_GROUPINFO("LAND_ALT_LOW", 25, ParametersG2, land_alt_low, 1000),
+
     AP_GROUPEND
 };
 

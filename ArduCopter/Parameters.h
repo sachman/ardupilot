@@ -569,6 +569,10 @@ public:
     
     // control over servo output ranges
     SRV_Channels servo_channels;
+
+	// Land alt final stage
+	AP_Int16 land_alt_low;
+
 };
 
 extern const AP_Param::Info        var_info[];
