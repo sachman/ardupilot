@@ -161,6 +161,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(button_update,          5,    100),
     SCHED_TASK(stats_update,           1,    100),
+    SCHED_TASK(read_tersus_serial,     5,    1500),
 };
 
 
@@ -175,6 +176,9 @@ void Copter::setup()
     StorageManager::set_layout_copter();
 
     init_ardupilot();
+
+    hal.uartE->begin(115200); //For Tersus Testing
+    nmea_init();
 
     camera.switch_off();
 

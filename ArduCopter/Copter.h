@@ -150,6 +150,13 @@ public:
     void setup() override;
     void loop() override;
 
+    //Tersus
+    void processGNHDT();
+
+    //Tersus heading
+    float tersus_heading = 0;
+    uint8_t tersus_heading_state = 0;
+
 private:
     // key aircraft parameters passed to multiple libraries
     AP_Vehicle::MultiCopter aparm;
@@ -1150,6 +1157,12 @@ private:
     void init_capabilities(void);
     void dataflash_periodic(void);
     void accel_cal_update(void);
+
+    //AP_Tersus.cpp
+    void read_tersus_serial();
+    void nmea_init();
+    void tersus_init();
+    // void parseTersus(uint16_t );
 
 public:
     void mavlink_delay_cb();
