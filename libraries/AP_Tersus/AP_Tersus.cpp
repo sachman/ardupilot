@@ -18,13 +18,13 @@ void Copter::read_tersus_serial()
 {
     uint16_t buf_len = 0, i;
     uint8_t serial_nmea[1024];
-    buf_len = hal.uartE->available();
+    buf_len = hal.uartC->available();
 
     if(buf_len > 0)
     {
         for(i = 0; i < buf_len; i++)
         {
-            serial_nmea[i] = hal.uartE->read();
+            serial_nmea[i] = hal.uartC->read();
         }
 
         for(i = 0; i< buf_len; i++)
@@ -395,6 +395,7 @@ void processTersus(uint8_t data){
                 // for(uint16_t i = 0; i < raw_data_index; i++)
                 //  ::printf("%X ", tersus_message_t.raw_data[i]);
                 // ::printf("\n");
+            //Decode the message
             parseTersus(tersus_msg_id);
             tersusProcessDataState = WAIT_TERSUS_SYNC1;
             // processTersusflag = false;
