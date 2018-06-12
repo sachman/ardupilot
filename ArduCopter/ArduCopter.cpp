@@ -177,7 +177,7 @@ void Copter::setup()
 
     init_ardupilot();
 
-    hal.uartC->begin(115200); //For Tersus Testing
+    hal.uartE->begin(115200); //For Tersus Testing
     nmea_init();
 
     camera.switch_off();

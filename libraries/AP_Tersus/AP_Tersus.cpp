@@ -18,13 +18,13 @@ void Copter::read_tersus_serial()
 {
     uint16_t buf_len = 0, i;
     uint8_t serial_nmea[1024];
-    buf_len = hal.uartC->available();
+    buf_len = hal.uartE->available();
 
     if(buf_len > 0)
     {
         for(i = 0; i < buf_len; i++)
         {
-            serial_nmea[i] = hal.uartC->read();
+            serial_nmea[i] = hal.uartE->read();
         }
 
         for(i = 0; i< buf_len; i++)
