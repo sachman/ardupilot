@@ -6,6 +6,8 @@
 #include <fcntl.h>
 
 
+#define TERSUS_HEADING_DEBUG
+
 enum ascii_state ASCII_state;
 enum nmea_state NMEA_state;
 
@@ -70,11 +72,15 @@ void processNMEA(uint8_t data)
             if(data != '*')
             {
                 GPSBuffer[GPSIndex++] = data;
+#ifdef TERSUS_HEADING_DEBUG
                 ::printf("%c", GPSBuffer[GPSIndex-1]);
+#endif
                 test_calc_crc ^= GPSBuffer[GPSIndex-1];
             }else{
                 GPSBuffer[GPSIndex] = '\0';
+#ifdef TERSUS_HEADING_DEBUG
                 ::printf("\nIndex %d\n", GPSIndex);
+#endif
                 NMEA_state = GET_NMEA_CRC;
             }
             break;
@@ -87,8 +93,10 @@ void processNMEA(uint8_t data)
                 if(count == 2)
                 {
                     tersus_rec_crc = 16 * _from_hex(rec_crc_test) + _from_hex(data);
+#ifdef TERSUS_HEADING_DEBUG
                     ::printf("rec_crc after %X\n", tersus_rec_crc);
                     ::printf("test_calc_crc %X\n", test_calc_crc);
+#endif
                     test_calc_crc = 0;
                 }
             }else
@@ -108,7 +116,9 @@ void processNMEA(uint8_t data)
 
          default :
             NMEA_state = START_NMEA;
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("default\n");
+#endif
     }
 
 }
@@ -117,18 +127,24 @@ void parseNMEA_msg()
 {
     if ((GPSBuffer[0] == 'G') && (GPSBuffer[1] == 'N' || GPSBuffer[1] == 'P') && (GPSBuffer[2] == 'H') && (GPSBuffer[3] == 'D') && (GPSBuffer[4] == 'T'))
       {
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("GNHDT found\n");
+#endif
         tersus_calc_crc = nmea_crc_check(GPSBuffer, GPSIndex);
         if(tersus_calc_crc == tersus_rec_crc)
             copter.processGNHDT();
         else
         {
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("Crc mismatch calc_crc %x rec_crc %x\n", tersus_calc_crc, tersus_rec_crc);
+#endif
         }
       }
       else
       {
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("GNHDT not found\n");
+#endif
       }
 }
 
@@ -144,7 +160,9 @@ uint8_t nmea_crc_check(uint8_t *test, uint8_t index)
         // ::printf("%x ", XOR);
         XOR ^= (uint8_t)test[i];
      }
+#ifdef TERSUS_HEADING_DEBUG
     ::printf("\nCalculated %x\n", XOR);
+#endif
     return XOR;
 }
 
@@ -157,7 +175,9 @@ bool self_isDigit(char c)
 
 void Copter::processGNHDT()
 {
+#ifdef TERSUS_HEADING_DEBUG
     ::printf("In process GNHDT\n");
+#endif
     char temp_data[12];
     uint8_t i = 0;
 
@@ -174,7 +194,9 @@ void Copter::processGNHDT()
         }
 
         tersus_heading = self_strtof(temp_data);
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("Heading %f\n", (double)tersus_heading);
+#endif
 }
 
 float self_strtof(char *p){
@@ -190,7 +212,9 @@ float self_strtof(char *p){
         }
         else if( *p == '.'){
                 // num1 = num1 + (float)num;
+#ifdef TERSUS_HEADING_DEBUG
                 ::printf("num1 %f\n", (double)num1);
+#endif
 //              p++;
                 break;
         }
@@ -199,7 +223,9 @@ float self_strtof(char *p){
     if(*p == '.'){
 
         // float frac = 0.1f;
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("value *p %c\n", *p);
+#endif
         p++;
 
         while( *p != '\0'){
@@ -207,7 +233,9 @@ float self_strtof(char *p){
             num_frac = (num_frac * 10) + (CHAR_TO_DIGIT(*p));
                 dec_count++;
             // frac = frac * 0.1f;
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("num_frac %f dec_count %d\n", (double)num_frac, dec_count);
+#endif
             p++;
         }
 
@@ -446,27 +474,37 @@ void parseTersus(uint16_t parse_tersus_msg_id){
 //      chprintf(chp, "Marktime msg!Seconds %f week %d\n", (float)seconds_test, week_test);
         copter.tersus_heading = tersus_message_t.tersus_heading_t.heading;
         tersusData_isPresent = true;
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("Heading received %f\n", (double)copter.tersus_heading);
         ::printf("T %d ID %d\n",tersus_message_t.tersus_heading_t.tersus_header.ms_in_week, tersus_message_t.tersus_heading_t.tersus_header.msg_id);
         ::printf("L %d pitch %f\n", tersus_message_t.tersus_heading_t.tersus_header.msg_len, tersus_message_t.tersus_heading_t.pitch);
         ::printf("SV %d\n", tersus_message_t.tersus_heading_t.no_of_sv);
+#endif
 
         if(tersus_message_t.tersus_heading_t.pos_type == TERSUS_POS_FIXED){
             copter.tersus_heading_state = 1;
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("Fixed %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+#endif
         }
         else if(tersus_message_t.tersus_heading_t.pos_type == TERSUS_POS_FLOAT){
             copter.tersus_heading_state = 0;
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("Float %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+#endif
         }
         else {
             copter.tersus_heading_state = 0;
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("Unknown %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+#endif
         }
         break;
 
     default :
+#ifdef TERSUS_HEADING_DEBUG
         ::printf("Default %d\n", tersus_msg_id);
+#endif
         break;
 
     }
@@ -530,21 +568,26 @@ void Copter::log_tersusHeading(void)
     char heading_data[100];
     if (tersusData_isPresent == true)
     {
-        hal.console->printf("Tersus Heading Data received\n");
+        ::printf("Tersus Heading Data received\n");
         if (fd_tersusHeading_logFile < 0)
             fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR, 0644);
         if (fd_tersusHeading_logFile > 0)
         {
-            sprintf(heading_data, "%f\n", copter.tersus_heading);
+            sprintf(heading_data, "%3.2f, %d\n", copter.tersus_heading, copter.tersus_heading_state);
             lseek(fd_tersusHeading_logFile, tersusLog_bytes_written, SEEK_SET);
-            bytes_written = write(fd_tersusHeading_logFile, heading_data, sizeof(heading_data));
+            bytes_written = write(fd_tersusHeading_logFile, heading_data, strlen(heading_data));
             tersusLog_bytes_written += bytes_written;
             if (bytes_written <= 0)
+#ifdef TERSUS_HEADING_DEBUG
                 ::printf("Heading Data not logged.\n");
+#endif
             close(fd_tersusHeading_logFile);
+            fd_tersusHeading_logFile = -1;
         }
         else
+#ifdef TERSUS_HEADING_DEBUG
             ::printf("Error opening File %s for Tersus Logging\n", TERSUS_HEADING_LOG_FILE);
+#endif
 
         tersusData_isPresent = false;
     }
@@ -553,9 +596,13 @@ void Copter::log_tersusHeading(void)
 
 void Copter::init_tersusLogging(void)
 {
-    hal.console->printf("Into %s\n", __func__);
+    /*hal.console->printf("Into %s\n", __func__);*/
     fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0644);
     if (fd_tersusHeading_logFile < 0)
-       hal.console->printf("Error in opening/creating file %s for Tersus Heading data Logging\n", TERSUS_HEADING_LOG_FILE);
+    {
+#ifdef TERSUS_HEADING_DEBUG
+       ::printf("Error in opening/creating file %s for Tersus Heading data Logging\n", TERSUS_HEADING_LOG_FILE);
+#endif
+    }
 }
 

@@ -34,7 +34,7 @@
 #define TERSUS_POS_FIXED 50
 #define TERSUS_POS_FLOAT 34
 
-#define TERSUS_HEADING_LOG_FILE "/fs/microsd/tersusHeading_logFile"
+#define TERSUS_HEADING_LOG_FILE "/fs/microsd/tersusHeading_logFile.txt"
 
 // extern void read_tersus_serial();
 extern uint32_t tersus_serial_data;
