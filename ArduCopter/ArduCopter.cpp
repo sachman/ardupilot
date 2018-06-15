@@ -74,6 +74,7 @@
 
 #include "Copter.h"
 
+
 #include "board_config.h"
 #include <stm32.h>
 
@@ -179,6 +180,13 @@ void Copter::setup()
 
     hal.uartE->begin(115200); //For Tersus Testing
     nmea_init();
+
+    hal.console->printf("Initiating Tersus Logging\n");
+    /* Prepare the resources to log the Tersus heading data   */
+    init_tersusLogging();
+    /* Register a task to be called in the IO thread to log data received by Tersus  */
+    hal.scheduler->register_io_process(FUNCTOR_BIND_MEMBER(&Copter::log_tersusHeading, void));
+
 
     camera.switch_off();
 

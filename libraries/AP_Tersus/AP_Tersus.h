@@ -34,6 +34,8 @@
 #define TERSUS_POS_FIXED 50
 #define TERSUS_POS_FLOAT 34
 
+#define TERSUS_HEADING_LOG_FILE "/fs/microsd/tersusHeading_logFile"
+
 // extern void read_tersus_serial();
 extern uint32_t tersus_serial_data;
 extern float tersus_heading;
@@ -140,3 +142,5 @@ void parseTersus(uint16_t);
 unsigned long CRC32Value(int );
 unsigned long CalculateBlockCRC32( unsigned long, unsigned char *);
 unsigned long ByteSwap (unsigned long );
+void log_tersusHeading(void);
+void init_tersusLogging(void);

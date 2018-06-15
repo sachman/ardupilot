@@ -93,6 +93,7 @@
 #include <AP_Arming/AP_Arming.h>
 #include <AP_VisualOdom/AP_VisualOdom.h>
 
+
 // Configuration
 #include "defines.h"
 #include "config.h"
@@ -152,6 +153,8 @@ public:
 
     //Tersus
     void processGNHDT();
+
+    void init_tersusLogging(void);
 
     //Tersus heading
     float tersus_heading = 0;
@@ -1163,6 +1166,7 @@ private:
     void nmea_init();
     void tersus_init();
     // void parseTersus(uint16_t );
+    void log_tersusHeading(void);
 
 public:
     void mavlink_delay_cb();

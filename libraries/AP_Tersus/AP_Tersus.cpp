@@ -1,8 +1,19 @@
 
 #include "AP_Tersus.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 enum ascii_state ASCII_state;
 enum nmea_state NMEA_state;
+
+
+
+int fd_tersusHeading_logFile  = -1;
+bool tersusData_isPresent = false;
+uint32_t tersusLog_bytes_written = 0;
 
 int16_t _from_hex(char a)
 {
@@ -434,6 +445,7 @@ void parseTersus(uint16_t parse_tersus_msg_id){
         // cam_log_flag = true;
 //      chprintf(chp, "Marktime msg!Seconds %f week %d\n", (float)seconds_test, week_test);
         copter.tersus_heading = tersus_message_t.tersus_heading_t.heading;
+        tersusData_isPresent = true;
         ::printf("Heading received %f\n", (double)copter.tersus_heading);
         ::printf("T %d ID %d\n",tersus_message_t.tersus_heading_t.tersus_header.ms_in_week, tersus_message_t.tersus_heading_t.tersus_header.msg_id);
         ::printf("L %d pitch %f\n", tersus_message_t.tersus_heading_t.tersus_header.msg_len, tersus_message_t.tersus_heading_t.pitch);
@@ -511,4 +523,39 @@ void parseTersus(uint16_t parse_tersus_msg_id){
 
     }
 }*/
+
+void Copter::log_tersusHeading(void)
+{
+    uint16_t bytes_written = 0;
+    char heading_data[100];
+    if (tersusData_isPresent == true)
+    {
+        hal.console->printf("Tersus Heading Data received\n");
+        if (fd_tersusHeading_logFile < 0)
+            fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR, 0644);
+        if (fd_tersusHeading_logFile > 0)
+        {
+            sprintf(heading_data, "%f\n", copter.tersus_heading);
+            lseek(fd_tersusHeading_logFile, tersusLog_bytes_written, SEEK_SET);
+            bytes_written = write(fd_tersusHeading_logFile, heading_data, sizeof(heading_data));
+            tersusLog_bytes_written += bytes_written;
+            if (bytes_written <= 0)
+                ::printf("Heading Data not logged.\n");
+            close(fd_tersusHeading_logFile);
+        }
+        else
+            ::printf("Error opening File %s for Tersus Logging\n", TERSUS_HEADING_LOG_FILE);
+
+        tersusData_isPresent = false;
+    }
+
+}
+
+void Copter::init_tersusLogging(void)
+{
+    hal.console->printf("Into %s\n", __func__);
+    fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0644);
+    if (fd_tersusHeading_logFile < 0)
+       hal.console->printf("Error in opening/creating file %s for Tersus Heading data Logging\n", TERSUS_HEADING_LOG_FILE);
+}
 
