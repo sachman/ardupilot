@@ -92,6 +92,7 @@
 #include <AP_Button/AP_Button.h>
 #include <AP_Arming/AP_Arming.h>
 #include <AP_VisualOdom/AP_VisualOdom.h>
+/*#include <AP_Tersus/AP_Tersus.h>*/
 
 
 // Configuration
@@ -151,14 +152,8 @@ public:
     void setup() override;
     void loop() override;
 
-    //Tersus
-    void processGNHDT();
-
-    void init_tersusLogging(void);
-
-    //Tersus heading
-    float tersus_heading = 0;
-    uint8_t tersus_heading_state = 0;
+    void read_tersus_serial();
+    void log_tersusHeading(void);
 
 private:
     // key aircraft parameters passed to multiple libraries
@@ -1161,12 +1156,7 @@ private:
     void dataflash_periodic(void);
     void accel_cal_update(void);
 
-    //AP_Tersus.cpp
-    void read_tersus_serial();
-    void nmea_init();
-    void tersus_init();
-    // void parseTersus(uint16_t );
-    void log_tersusHeading(void);
+
 
 public:
     void mavlink_delay_cb();

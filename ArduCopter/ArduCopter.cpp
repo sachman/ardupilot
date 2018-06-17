@@ -179,11 +179,12 @@ void Copter::setup()
     init_ardupilot();
 
     hal.uartE->begin(115200); //For Tersus Testing
-    nmea_init();
+
+    tersus.nmea_init();
 
     hal.console->printf("Initiating Tersus Logging\n");
     /* Prepare the resources to log the Tersus heading data   */
-    init_tersusLogging();
+    tersus.init_tersusLogging();
     /* Register a task to be called in the IO thread to log data received by Tersus  */
     hal.scheduler->register_io_process(FUNCTOR_BIND_MEMBER(&Copter::log_tersusHeading, void));
 
@@ -438,6 +439,9 @@ void Copter::ten_hz_logging_loop()
 #if FRAME_CONFIG == HELI_FRAME
     Log_Write_Heli();
 #endif
+
+    /* Log Data received from Tersus  */
+    DataFlash.Log_Write_TersusHeading();
 }
 
 // twentyfive_hz_logging - should be run at 25hz

@@ -836,6 +836,16 @@ void Copter::Log_Write_Beacon()
     DataFlash.Log_Write_Beacon(g2.beacon);
 }
 
+/*
+// Write Tersus Heading data and State
+void AP_Tersus::Log_Write_Tersus()
+{
+#if 0
+    DataFlash.Log_Write_TersusHeading(tersus);
+#endif
+}
+*/
+
 const struct LogStructure Copter::log_structure[] = {
     LOG_COMMON_STRUCTURES,
 #if AUTOTUNE_ENABLED == ENABLED

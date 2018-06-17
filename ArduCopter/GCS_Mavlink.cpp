@@ -95,7 +95,7 @@ NOINLINE void Copter::send_attitude(mavlink_channel_t chan)
         ahrs.yaw,
         gyro.x,
         gyro.y,
-        tersus_heading);//gyro.z);
+        tersus.heading);//gyro.z);
 }
 
 #if AC_FENCE == ENABLED
@@ -117,7 +117,7 @@ NOINLINE void Copter::send_extended_status1(mavlink_channel_t chan)
     }
 
     update_sensor_status_flags();
-    battery_current = (int16_t)copter.tersus_heading_state; //For tersus heading state
+    battery_current = (int16_t)tersus.heading_state; //For tersus heading state
     mavlink_msg_sys_status_send(
         chan,
         control_sensors_present,

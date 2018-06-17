@@ -4,12 +4,29 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+/*#include <Copter.h>*/
+#include <../ArduCopter/Copter.h>
 
+
+#define CRC32_POLYNOMIAL 0xEDB88320 // CRC32_POLYNOMIAL.
 
 #define TERSUS_HEADING_DEBUG
 
 enum ascii_state ASCII_state;
 enum nmea_state NMEA_state;
+
+uint8_t header_array[HEADER_SIZE], comnav_crc[4];
+uint16_t tersus_msg_length, expected_msg_length = 0, tersus_msg_id, raw_data_index, msg_buf_index = 0;
+
+enum tersus_state tersusProcessDataState;
+
+union tersus_message tersus_message_t;
+
+uint8_t ascii_header_index = 0, ASCII_header[20], ASCII_data_buf[512], GPSBuffer[82], GPSIndex = 0, tersus_calc_crc = 0, tersus_rec_crc = 0, count = 0, test_calc_crc = 0, rec_crc_test;
+uint8_t crc_count = 0, crc_index = 0;
+uint16_t ascii_data_buf_index = 0;
+
+uint32_t calculated_CRC = 0, rec_CRC = 0;
 
 
 
@@ -49,7 +66,7 @@ void Copter::read_tersus_serial()
     }
 }
 
-void Copter::nmea_init()
+void AP_Tersus::nmea_init()
 {
     NMEA_state = START_NMEA;
 }
@@ -132,7 +149,7 @@ void parseNMEA_msg()
 #endif
         tersus_calc_crc = nmea_crc_check(GPSBuffer, GPSIndex);
         if(tersus_calc_crc == tersus_rec_crc)
-            copter.processGNHDT();
+            tersus.processGNHDT();
         else
         {
 #ifdef TERSUS_HEADING_DEBUG
@@ -173,7 +190,7 @@ bool self_isDigit(char c)
     else return false;
 }
 
-void Copter::processGNHDT()
+void AP_Tersus::processGNHDT()
 {
 #ifdef TERSUS_HEADING_DEBUG
     ::printf("In process GNHDT\n");
@@ -193,9 +210,9 @@ void Copter::processGNHDT()
             }
         }
 
-        tersus_heading = self_strtof(temp_data);
+        tersus.heading = self_strtof(temp_data);
 #ifdef TERSUS_HEADING_DEBUG
-        ::printf("Heading %f\n", (double)tersus_heading);
+        ::printf("Heading %f\n", (double)tersus.heading);
 #endif
 }
 
@@ -247,7 +264,7 @@ float self_strtof(char *p){
     return num1;
 }
 
-void Copter::tersus_init(){
+void AP_Tersus::tersus_init(){
     tersusProcessDataState = WAIT_TERSUS_SYNC1;
 }
 
@@ -472,31 +489,31 @@ void parseTersus(uint16_t parse_tersus_msg_id){
         // week_test = comnav_message_t.comnav_marktime_t.week;
         // cam_log_flag = true;
 //      chprintf(chp, "Marktime msg!Seconds %f week %d\n", (float)seconds_test, week_test);
-        copter.tersus_heading = tersus_message_t.tersus_heading_t.heading;
+        tersus.heading = tersus_message_t.tersus_heading_t.heading;
         tersusData_isPresent = true;
 #ifdef TERSUS_HEADING_DEBUG
-        ::printf("Heading received %f\n", (double)copter.tersus_heading);
+        ::printf("Heading received %f\n", (double)tersus.heading);
         ::printf("T %d ID %d\n",tersus_message_t.tersus_heading_t.tersus_header.ms_in_week, tersus_message_t.tersus_heading_t.tersus_header.msg_id);
         ::printf("L %d pitch %f\n", tersus_message_t.tersus_heading_t.tersus_header.msg_len, tersus_message_t.tersus_heading_t.pitch);
         ::printf("SV %d\n", tersus_message_t.tersus_heading_t.no_of_sv);
 #endif
 
         if(tersus_message_t.tersus_heading_t.pos_type == TERSUS_POS_FIXED){
-            copter.tersus_heading_state = 1;
+            tersus.heading_state = 1;
 #ifdef TERSUS_HEADING_DEBUG
-            ::printf("Fixed %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+            ::printf("Fixed %d Val %d\n", tersus.heading_state, tersus_message_t.tersus_heading_t.pos_type);
 #endif
         }
         else if(tersus_message_t.tersus_heading_t.pos_type == TERSUS_POS_FLOAT){
-            copter.tersus_heading_state = 0;
+            tersus.heading_state = 0;
 #ifdef TERSUS_HEADING_DEBUG
-            ::printf("Float %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+            ::printf("Float %d Val %d\n", tersus.heading_state, tersus_message_t.tersus_heading_t.pos_type);
 #endif
         }
         else {
-            copter.tersus_heading_state = 0;
+            tersus.heading_state = 0;
 #ifdef TERSUS_HEADING_DEBUG
-            ::printf("Unknown %d Val %d\n", copter.tersus_heading_state, tersus_message_t.tersus_heading_t.pos_type);
+            ::printf("Unknown %d Val %d\n", tersus.heading_state, tersus_message_t.tersus_heading_t.pos_type);
 #endif
         }
         break;
@@ -573,7 +590,7 @@ void Copter::log_tersusHeading(void)
             fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR, 0644);
         if (fd_tersusHeading_logFile > 0)
         {
-            sprintf(heading_data, "%3.2f, %d\n", copter.tersus_heading, copter.tersus_heading_state);
+            sprintf(heading_data, "%3.2f, %d\n", tersus.heading, tersus.heading_state);
             lseek(fd_tersusHeading_logFile, tersusLog_bytes_written, SEEK_SET);
             bytes_written = write(fd_tersusHeading_logFile, heading_data, strlen(heading_data));
             tersusLog_bytes_written += bytes_written;
@@ -594,7 +611,7 @@ void Copter::log_tersusHeading(void)
 
 }
 
-void Copter::init_tersusLogging(void)
+void AP_Tersus::init_tersusLogging(void)
 {
     /*hal.console->printf("Into %s\n", __func__);*/
     fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0644);
@@ -605,4 +622,6 @@ void Copter::init_tersusLogging(void)
 #endif
     }
 }
+
+AP_Tersus tersus;
 

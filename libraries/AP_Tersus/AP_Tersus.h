@@ -2,7 +2,7 @@
 #pragma once
 
 #include <AP_HAL/AP_HAL.h>
-#include <../ArduCopter/Copter.h>
+/*#include <../ArduCopter/Copter.h>*/
 #include <GCS_MAVLink/GCS_MAVLink.h>
 
 #define CHAR_TO_DIGIT(c)    (c - '0')
@@ -29,7 +29,7 @@
 //#define COMNAV_RESET_BYTE_4 'M'
 
 #define TERSUS_HEADING_MSG_ID 971   // Heading Msg information with the ALIGN feature.
-#define CRC32_POLYNOMIAL 0xEDB88320 // CRC32_POLYNOMIAL.
+
 
 #define TERSUS_POS_FIXED 50
 #define TERSUS_POS_FLOAT 34
@@ -38,14 +38,10 @@
 
 // extern void read_tersus_serial();
 extern uint32_t tersus_serial_data;
-extern float tersus_heading;
-extern Copter copter;
+/*extern float tersus_heading;*/
+//extern Copter copter;
 
-uint8_t ascii_header_index = 0, ASCII_header[20], ASCII_data_buf[512], GPSBuffer[82], GPSIndex = 0, tersus_calc_crc = 0, tersus_rec_crc = 0, count = 0, test_calc_crc = 0, rec_crc_test;
-uint8_t crc_count = 0, crc_index = 0;
-uint16_t ascii_data_buf_index = 0;
 
-uint32_t calculated_CRC = 0, rec_CRC = 0;
 
 enum ascii_state {
     START_ASCII, GET_ASCII_HEADER, GET_ASCII_DATA, GET_ASCII_CRC, END_ASCII
@@ -122,12 +118,9 @@ union tersus_message {
     uint8_t raw_data[1024];
 };
 
-uint8_t header_array[HEADER_SIZE], comnav_crc[4];
-uint16_t tersus_msg_length, expected_msg_length = 0, tersus_msg_id, raw_data_index, msg_buf_index = 0;
 
-enum tersus_state tersusProcessDataState;
 
-union tersus_message tersus_message_t;
+
 
 void processNMEA(uint8_t );
 void parseNMEA_msg();
@@ -142,5 +135,31 @@ void parseTersus(uint16_t);
 unsigned long CRC32Value(int );
 unsigned long CalculateBlockCRC32( unsigned long, unsigned char *);
 unsigned long ByteSwap (unsigned long );
-void log_tersusHeading(void);
-void init_tersusLogging(void);
+
+
+class AP_Tersus {
+public:
+    //Tersus
+    void processGNHDT();
+
+    void init_tersusLogging(void);
+
+    //Tersus heading
+    float heading = 0;
+    uint8_t heading_state = 0;
+
+    void Log_Write_Tersus();
+
+    void nmea_init();
+
+
+private:
+    //AP_Tersus.cpp
+
+
+    void tersus_init();
+    // void parseTersus(uint16_t );
+
+};
+
+extern AP_Tersus tersus;

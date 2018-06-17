@@ -2244,3 +2244,15 @@ void DataFlash_Class::Log_Write_Beacon(AP_Beacon &beacon)
     };
     WriteBlock(&pkt_beacon, sizeof(pkt_beacon));
 }
+
+// Write Tersus Heading data
+void DataFlash_Class::Log_Write_TersusHeading()
+{
+    struct log_TersusHeading pkt_TersusHeading = {
+       LOG_PACKET_HEADER_INIT(LOG_TERSUS_HEADING_MSG),
+       time_us         : AP_HAL::micros64(),
+       state           : (uint8_t)tersus.heading_state,
+       heading         : tersus.heading
+    };
+    WriteBlock(&pkt_TersusHeading, sizeof(pkt_TersusHeading));
+}
