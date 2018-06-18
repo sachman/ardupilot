@@ -817,6 +817,8 @@ struct PACKED log_TersusHeading {
     uint64_t time_us;
     uint8_t state;
     float heading;
+    uint64_t attitudeHead_LogTime;
+    float attitudeHead;
 };
 
 // #endif // SBP_HW_LOGGING
@@ -859,8 +861,8 @@ struct PACKED log_TersusHeading {
 #define CURR_LABELS "TimeUS,Volt,Curr,CurrTot,Temp,V1,V2,V3,V4,V5,V6,V7,V8,V9,V10"
 #define CURR_FMT    "QfffcHHHHHHHHHH"
 
-#define TERSUS_LABELS "TimeUS,State,Heading"
-#define TERSUS_FMT    "QBf"
+#define TERSUS_LABELS "TrsHead_LogTime,Status,Trs_Head,Att_Head_LogTime,Att_Head"
+#define TERSUS_FMT    "QBfQf"
 
 /*
 Format characters in the format string for binary log messages
@@ -944,7 +946,7 @@ Format characters in the format string for binary log messages
     { LOG_BEACON_MSG, sizeof(log_Beacon), \
       "BCN", "QBBfffffff",  "TimeUS,Health,Cnt,D0,D1,D2,D3,PosX,PosY,PosZ" }, \
     { LOG_TERSUS_HEADING_MSG, sizeof(log_TersusHeading), \
-      "TRS", "QBf",  "TimeUS,Status,Heading" }
+      "TRS", "QBfQf",  "TrsHead_LogTime,Status,Trs_Head,Att_Head_LogTime,Att_Head" }
 
 // messages for more advanced boards
 #define LOG_EXTRA_STRUCTURES \

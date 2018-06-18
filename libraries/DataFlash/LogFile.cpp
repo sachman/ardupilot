@@ -1891,6 +1891,8 @@ void DataFlash_Class::Log_Write_Attitude(AP_AHRS &ahrs, const Vector3f &targets)
         error_rp        : (uint16_t)(ahrs.get_error_rp() * 100),
         error_yaw       : (uint16_t)(ahrs.get_error_yaw() * 100)
     };
+    tersus.attitude_heading = pkt.yaw;
+    tersus.attitude_headingLog_timeStamp = pkt.time_us;
     WriteBlock(&pkt, sizeof(pkt));
 }
 
@@ -2250,9 +2252,11 @@ void DataFlash_Class::Log_Write_TersusHeading()
 {
     struct log_TersusHeading pkt_TersusHeading = {
        LOG_PACKET_HEADER_INIT(LOG_TERSUS_HEADING_MSG),
-       time_us         : AP_HAL::micros64(),
-       state           : (uint8_t)tersus.heading_state,
-       heading         : tersus.heading
+       time_us              : AP_HAL::micros64(),
+       state                : (uint8_t)tersus.heading_state,
+       heading              : tersus.heading,
+       attitudeHead_LogTime   : tersus.attitude_headingLog_timeStamp,
+       attitudeHead           : (float)tersus.attitude_heading/100
     };
     WriteBlock(&pkt_TersusHeading, sizeof(pkt_TersusHeading));
 }

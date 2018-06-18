@@ -145,8 +145,10 @@ public:
     void init_tersusLogging(void);
 
     //Tersus heading
-    float heading = 0;
+    float heading = 0.0;
     uint8_t heading_state = 0;
+    float attitude_heading = 0.0;
+    uint64_t attitude_headingLog_timeStamp = 0;
 
     void Log_Write_Tersus();
 

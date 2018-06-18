@@ -590,7 +590,9 @@ void Copter::log_tersusHeading(void)
             fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR, 0644);
         if (fd_tersusHeading_logFile > 0)
         {
-            sprintf(heading_data, "%3.2f, %d\n", tersus.heading, tersus.heading_state);
+            sprintf(heading_data, "%llu, %d, %3.2f ,%llu ,%3.2f\n",
+                    AP_HAL::micros64(), tersus.heading_state, tersus.heading,
+                    tersus.attitude_headingLog_timeStamp, float(tersus.attitude_heading)/100);
             lseek(fd_tersusHeading_logFile, tersusLog_bytes_written, SEEK_SET);
             bytes_written = write(fd_tersusHeading_logFile, heading_data, strlen(heading_data));
             tersusLog_bytes_written += bytes_written;
@@ -614,7 +616,7 @@ void Copter::log_tersusHeading(void)
 void AP_Tersus::init_tersusLogging(void)
 {
     /*hal.console->printf("Into %s\n", __func__);*/
-    fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0644);
+    fd_tersusHeading_logFile = open(TERSUS_HEADING_LOG_FILE, O_RDWR|O_CREAT|O_TRUNC, 0644);
     if (fd_tersusHeading_logFile < 0)
     {
 #ifdef TERSUS_HEADING_DEBUG
