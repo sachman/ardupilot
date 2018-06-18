@@ -490,6 +490,15 @@ void parseTersus(uint16_t parse_tersus_msg_id){
         // cam_log_flag = true;
 //      chprintf(chp, "Marktime msg!Seconds %f week %d\n", (float)seconds_test, week_test);
         tersus.heading = tersus_message_t.tersus_heading_t.heading;
+
+
+        /* Constant offset correction for Dual antenna heading to align with UAV's Heading Axis.
+         * The offset value corrected here is approximate.
+         */
+        tersus.heading -= 90;
+        if (tersus.heading < 0)
+            tersus.heading = 360 + tersus.heading;
+
         tersusData_isPresent = true;
 #ifdef TERSUS_HEADING_DEBUG
         ::printf("Heading received %f\n", (double)tersus.heading);
