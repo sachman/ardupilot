@@ -879,15 +879,15 @@ void AP_GPS::send_mavlink_gps2_raw(mavlink_channel_t chan)
     mavlink_msg_gps2_raw_send(
         chan,
         last_fix_time_ms(1)*(uint64_t)1000,
-        status(1),
+        tersus.sol_state,//status(1),
         loc.lat,
         loc.lng,
         loc.alt * 10UL,
-        get_hdop(1),
+        tersus.hdg_std_dev*100,//get_hdop(1),
         get_vdop(1),
-        ground_speed(1)*100,  // cm/s
-        ground_course(1)*100, // 1/100 degrees,
-        num_sats(1),
+        tersus.heading_state*100,//ground_speed(1)*100,  // cm/s
+        tersus.heading*100,//ground_course(1)*100, // 1/100 degrees,
+        tersus.satCount_sol,//num_sats(1),
         0,
         0);
 }

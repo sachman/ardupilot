@@ -149,6 +149,12 @@ public:
     uint8_t heading_state = 0;
     float attitude_heading = 0.0;
     uint64_t attitude_headingLog_timeStamp = 0;
+    uint32_t sol_state = 0xFFFFFFFF;
+    float base_length = 0.0;
+    float pitch = 0.0;
+    float hdg_std_dev = 0.0;
+    uint8_t satCount_track = 0;
+    uint8_t satCount_sol = 0;
 
     void Log_Write_Tersus();
 

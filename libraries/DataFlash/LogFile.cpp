@@ -2253,8 +2253,13 @@ void DataFlash_Class::Log_Write_TersusHeading()
     struct log_TersusHeading pkt_TersusHeading = {
        LOG_PACKET_HEADER_INIT(LOG_TERSUS_HEADING_MSG),
        time_us              : AP_HAL::micros64(),
+       sol_state            : tersus.sol_state,
        state                : (uint8_t)tersus.heading_state,
        heading              : tersus.heading,
+       heading_StD          : tersus.hdg_std_dev*100,
+       pitch                : tersus.pitch,
+       sat_count            : tersus.satCount_track,
+       sat_count_sol        : tersus.satCount_sol,
        attitudeHead_LogTime   : tersus.attitude_headingLog_timeStamp,
        attitudeHead           : (float)tersus.attitude_heading/100
     };

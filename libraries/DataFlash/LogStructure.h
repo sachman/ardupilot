@@ -19,7 +19,7 @@ struct LogStructure {
     uint8_t msg_len;
     const char name[5];
     const char format[16];
-    const char labels[64];
+    const char labels[100];
 };
 
 /*
@@ -815,8 +815,13 @@ struct PACKED log_Beacon {
 struct PACKED log_TersusHeading {
     LOG_PACKET_HEADER;
     uint64_t time_us;
+    uint32_t sol_state;
     uint8_t state;
     float heading;
+    float heading_StD;
+    float pitch;
+    uint8_t sat_count;
+    uint8_t sat_count_sol;
     uint64_t attitudeHead_LogTime;
     float attitudeHead;
 };
@@ -946,7 +951,7 @@ Format characters in the format string for binary log messages
     { LOG_BEACON_MSG, sizeof(log_Beacon), \
       "BCN", "QBBfffffff",  "TimeUS,Health,Cnt,D0,D1,D2,D3,PosX,PosY,PosZ" }, \
     { LOG_TERSUS_HEADING_MSG, sizeof(log_TersusHeading), \
-      "TRS", "QBfQf",  "TrsHead_LogTime,Status,Trs_Head,Att_Head_LogTime,Att_Head" }
+      "TRS", "QIBfffBBQf",  "Trs_LogTm,Sol_St,Pos_St,Trs_Head,Trs_Head_StD,Trs_Pitch,satCnt,satCnt_sol,Att_LogTm,Att_Head" }
 
 // messages for more advanced boards
 #define LOG_EXTRA_STRUCTURES \

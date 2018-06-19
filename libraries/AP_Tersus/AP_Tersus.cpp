@@ -499,14 +499,30 @@ void parseTersus(uint16_t parse_tersus_msg_id){
         if (tersus.heading < 0)
             tersus.heading = 360 + tersus.heading;
 
+        tersus.sol_state = tersus_message_t.tersus_heading_t.sol_stat;
+        tersus.base_length = tersus_message_t.tersus_heading_t.length;
+        tersus.pitch = tersus_message_t.tersus_heading_t.pitch;
+        tersus.hdg_std_dev = tersus_message_t.tersus_heading_t.hdg_std_dev;
+        tersus.satCount_track = tersus_message_t.tersus_heading_t.no_of_sv;
+        tersus.satCount_sol = tersus_message_t.tersus_heading_t.no_of_soln_sv;
+        tersus.heading_state = tersus_message_t.tersus_heading_t.pos_type;
+
         tersusData_isPresent = true;
 #ifdef TERSUS_HEADING_DEBUG
         ::printf("Heading received %f\n", (double)tersus.heading);
         ::printf("T %d ID %d\n",tersus_message_t.tersus_heading_t.tersus_header.ms_in_week, tersus_message_t.tersus_heading_t.tersus_header.msg_id);
         ::printf("L %d pitch %f\n", tersus_message_t.tersus_heading_t.tersus_header.msg_len, tersus_message_t.tersus_heading_t.pitch);
         ::printf("SV %d\n", tersus_message_t.tersus_heading_t.no_of_sv);
+        ::printf("SV_in_Sol %d\n", tersus.satCount_sol);
+        ::printf("Case Length: %3.2f\n", tersus.base_length);
+        ::printf("Heading SD: %3.2f\n", tersus.hdg_std_dev);
 #endif
 
+
+#ifdef TERSUS_HEADING_DEBUG
+        ::printf("Sol type %d Pos type %d\n", tersus.sol_state, tersus.heading_state);
+#endif
+        /*
         if(tersus_message_t.tersus_heading_t.pos_type == TERSUS_POS_FIXED){
             tersus.heading_state = 1;
 #ifdef TERSUS_HEADING_DEBUG
@@ -525,6 +541,7 @@ void parseTersus(uint16_t parse_tersus_msg_id){
             ::printf("Unknown %d Val %d\n", tersus.heading_state, tersus_message_t.tersus_heading_t.pos_type);
 #endif
         }
+        */
         break;
 
     default :
