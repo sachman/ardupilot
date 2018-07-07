@@ -884,6 +884,14 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(terrain_follow, "TERRAIN_FOLLOW", 0),
 
+	// @Param: NUM_TAKEOFF
+	// @DisplayName: Number of takeoffs
+	// @Description: This is used to calculate number of takeoffs done.
+	// @User: Advanced
+	// @ReadOnly: True
+	GSCALAR(num_takeoffs,          "NUM_TAKEOFFS",  0),
+
+
     // @Group: 
     // @Path: Parameters.cpp
     GOBJECT(g2, "",  ParametersG2),

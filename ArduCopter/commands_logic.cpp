@@ -658,6 +658,11 @@ void Copter::do_guided_limits(const AP_Mission::Mission_Command& cmd)
 // verify_takeoff - check if we have completed the takeoff
 bool Copter::verify_takeoff()
 {
+	if(wp_nav->reached_wp_destination()){
+		uint16_t num_takeoffs = g.num_takeoffs + 1;
+		g.num_takeoffs.set_and_save(num_takeoffs);
+	}
+
     // have we reached our target altitude?
     return wp_nav->reached_wp_destination();
 }

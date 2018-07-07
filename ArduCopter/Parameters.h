@@ -364,6 +364,7 @@ public:
         k_param_autotune_min_d, // 251
         k_param_arming, // 252  - AP_Arming
         k_param_DataFlash = 253, // 253 - Logging Group
+		k_param_num_takeoffs,
 
         // 254,255: reserved
 
@@ -483,6 +484,8 @@ public:
     AP_Int8                 autotune_axis_bitmask;
     AP_Float                autotune_aggressiveness;
     AP_Float                autotune_min_d;
+
+    AP_Int16				num_takeoffs;
 
     // Note: keep initializers here in the same order as they are declared
     // above.
