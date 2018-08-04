@@ -149,6 +149,8 @@ SPIDesc SPIDeviceManager::device_table[] = {
     SPIDesc("external3",    PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_EXT3, SPIDEV_MODE3, 2*MHZ, 2*MHZ),
 #endif
 #endif
+    /* AUS: TODO  */
+    SPIDesc("hg1120",    PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_HG1120, SPIDEV_MODE3, 6*MHZ, 6*MHZ),
 
     SPIDesc(nullptr, 0, (spi_dev_e)0, (spi_mode_e)0, 0, 0),
 };

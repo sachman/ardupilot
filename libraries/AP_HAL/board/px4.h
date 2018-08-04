@@ -85,6 +85,8 @@
 #define HAL_COMPASS_HMC5843_NAME "hmc5843"
 #define HAL_COMPASS_LIS3MDL_NAME "lis3mdl"
 
+#define HAL_INS_HG1120_NAME     "hg1120"
+
 /* px4fmu-v1 */
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V1
 #define HAL_BARO_MS5611_I2C_ADDR 0x76
