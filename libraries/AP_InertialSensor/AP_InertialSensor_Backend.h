@@ -93,6 +93,8 @@ public:
         DEVTYPE_GYR_MPU9250  = 0x24,
 		DEVTYPE_ACC_LSM9DS1  = 0x18,
 		DEVTYPE_GYR_LSM9DS1  = 0x26,
+		DEVTYPE_ACC_HG1120   = 0x44,
+		DEVTYPE_GYR_HG1120   = 0x45,
     };
         
 protected:
