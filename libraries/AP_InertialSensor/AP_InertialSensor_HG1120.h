@@ -162,7 +162,9 @@ private:
     };
 
     union HG1120_message {
-        uint8_t raw_data[100];
+//        uint8_t raw_data[100];
+//        uint8_t raw_data[SENSOR_MSG_BUFFER_LENGTH];
+        uint8_t raw_data[700];
         struct spi_controlMessage_04format spiCtrlMsgPacket;
         struct spi_InertialMessage_05format spiInertialMsgPacket;
     };
