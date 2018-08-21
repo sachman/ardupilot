@@ -480,6 +480,15 @@ void AP_InertialSensor_HG1120::honWl_IMU_spiFetch(uint8_t *data_out) {
         hal.console->printf("HG1120: error reading from sensor\n");
         return;
     }
+
+#if 1
+            /* Print the message fetched from the sensor  */
+            hal.console->printf("Data Fetched = ");
+            for (int k=0; k< SENSOR_MESSAGE_PACKET_LENGTH; k++) {
+                hal.console->printf("%02x ", data_out[k]);
+            }
+            hal.console->printf("\n");
+#endif
 }
 
 //uint8_t AP_InertialSensor_LSM9DS1::_register_read(uint8_t reg)
