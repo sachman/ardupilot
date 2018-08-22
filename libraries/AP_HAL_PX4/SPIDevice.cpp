@@ -155,7 +155,8 @@ SPIDesc SPIDeviceManager::device_table[] = {
 //    SPIDesc("hg1120",    PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_HG1120, SPIDEV_MODE3, 100*KHZ, 100*KHZ),
 
 //    SPIDesc("mpu9250_breakout",      PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_MPU, SPIDEV_MODE3, 1*MHZ, 8*MHZ),
-    SPIDesc("lsm9ds1_ag_breakout",      PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_LSM9DS1_AG_BREAKOUT, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
+//    SPIDesc("lsm9ds1_ag_breakout",      PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_LSM9DS1_AG_BREAKOUT, SPIDEV_MODE3, 11*MHZ, 11*MHZ),
+    SPIDesc("lsm9ds1_ag_breakout",      PX4_SPI_BUS_EXT, (spi_dev_e)PX4_SPIDEV_LSM9DS1_AG_BREAKOUT, SPIDEV_MODE3, 6*MHZ, 6*MHZ),
 
     SPIDesc(nullptr, 0, (spi_dev_e)0, (spi_mode_e)0, 0, 0),
 };

@@ -266,20 +266,24 @@ bool AP_InertialSensor_HG1120::_hardware_init()
 
     uint8_t tries, whoami;
 
-    for (tries = 0; tries < 5; tries++) {
+    for (tries = 0; tries < 50; tries++) {
 
         whoami = _getIMUaddress();
         if (whoami != WHO_AM_I) {
-            hal.console->printf("HG1120: unexpected acc/gyro WHOAMI 0x%x\n", whoami);
+//            hal.console->printf("HG1120: unexpected acc/gyro WHOAMI 0x%x\n", whoami);
+            ::printf("HG1120: unexpected acc/gyro WHOAMI 0x%x\n", whoami);
         }
-        hal.scheduler->delay(10);
+        else {
+            break;
+        }
+        hal.scheduler->delay(1);
 
 #if HG1120_DEBUG
         _dump_registers();
 #endif
     }
 
-    if (tries == 5) {
+    if (tries == 50) {
         hal.console->printf("Failed to boot HG1120 5 times\n\n");
         goto fail_tries;
     }
@@ -324,6 +328,9 @@ bool AP_InertialSensor_HG1120::parse_HonWlIMU_data(uint8_t *data_in) {
     uint8_t i;
     uint16_t u16sum = 0;
 
+    static uint16_t error_count = 0;
+    static uint16_t valid_packet_count = 0;
+
     int16_t helper_angularRate_X, helper_angularRate_Y, helper_angularRate_Z;
     int16_t helper_accel_X, helper_accel_Y, helper_accel_Z;
     int16_t helper_mag_X, helper_mag_Y, helper_mag_Z;
@@ -342,7 +349,21 @@ bool AP_InertialSensor_HG1120::parse_HonWlIMU_data(uint8_t *data_in) {
        /* Sanity check  */
        if (u16sum != receivedCheckSum) {
            _imu_address = 0;
-           hal.console->printf("HG1120: Checksum Error\n\n");
+//           hal.console->printf("HG1120: Checksum Error\n");
+           ::printf("HG1120: Checksum Error\n");
+//           hal.console->printf("HG1120: CheckSumReceived: %02x %02x\n",
+//                   (imuMessage.spiCtrlMsgPacket.controlMessage.checkSum[1]),
+//                   (imuMessage.spiCtrlMsgPacket.controlMessage.checkSum[0]));
+//
+//           hal.console->printf("HG1120: Checksum Calculated: %02x %02x\n\n",
+//                   ((u16sum&0xFF00) >> 8), (u16sum&0x00FF));
+
+           /* To quantify the checksum error packets  */
+           ++error_count;
+//           ::printf("HG1120: Ratio of Errorenous:Valid packets = %d:%d\n", error_count, valid_packet_count);
+//           valid_packet_count = 0;
+
+           return false;
        }
        else { /* Data is sane  */
            helper_angularRate_X = ((imuMessage.spiCtrlMsgPacket.controlMessage.controlData.controlData.angular_rate_X[1] << 8) |
@@ -377,10 +398,22 @@ bool AP_InertialSensor_HG1120::parse_HonWlIMU_data(uint8_t *data_in) {
            _mag_X = helper_mag_X * (0.438404);
            _mag_Y = helper_mag_Y * (0.438404);
            _mag_Z = helper_mag_Z * (0.438404);
+
+//           error_count = 0;
+           ++valid_packet_count;
+
+           /* To quantify the checksum error packets  */
+           if (valid_packet_count >= 2000) {
+               ::printf("HG1120: Ratio of Errorenous:Valid packets = %d:%d\n", error_count, valid_packet_count);
+               error_count = 0;
+               valid_packet_count = 0;
+           }
+
+           return true;
        }
    }
 
-   return true;
+   return false;
 }
 
 //void AP_InertialSensor_LSM9DS1::_fifo_reset()
@@ -479,13 +512,16 @@ void AP_InertialSensor_HG1120::honWl_IMU_spiFetch(uint8_t *data_out) {
     for (int i=0; i< sizeof(txbuf_dummy); i++) {
         txbuf_dummy[i] = i;
     }
-    if (!_dev->transfer(txbuf_dummy, SENSOR_MESSAGE_PACKET_LENGTH,
+//    if (!_dev->transfer(txbuf_dummy, SENSOR_MESSAGE_PACKET_LENGTH,
+//            data_out, SENSOR_MESSAGE_PACKET_LENGTH)) {
+    if (!_dev->transfer(txbuf_dummy, 0,
             data_out, SENSOR_MESSAGE_PACKET_LENGTH)) {
-        hal.console->printf("HG1120: error reading from sensor\n");
+//        hal.console->printf("HG1120: error reading from sensor\n");
+        ::printf("HG1120: error reading from sensor\n");
         return;
     }
 
-#if 1
+#if 0
             /* Print the message fetched from the sensor  */
             hal.console->printf("Data Fetched = ");
             for (int k=0; k< SENSOR_MESSAGE_PACKET_LENGTH; k++) {
