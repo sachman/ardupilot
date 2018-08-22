@@ -86,6 +86,7 @@
 #define HAL_COMPASS_LIS3MDL_NAME "lis3mdl"
 
 #define HAL_INS_HG1120_NAME     "hg1120"
+#define HAL_INS_MPU9250_BREAKOUT_NAME   "mpu9250_breakout"
 
 /* px4fmu-v1 */
 #ifdef CONFIG_ARCH_BOARD_PX4FMU_V1

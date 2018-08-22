@@ -474,7 +474,11 @@ void AP_InertialSensor_HG1120::_poll_data() {
 
 void AP_InertialSensor_HG1120::honWl_IMU_spiFetch(uint8_t *data_out) {
 
-    const uint8_t txbuf_dummy[100] = {0};
+//    const uint8_t txbuf_dummy[100] = {0};
+    uint8_t txbuf_dummy[100];
+    for (int i=0; i< sizeof(txbuf_dummy); i++) {
+        txbuf_dummy[i] = i;
+    }
     if (!_dev->transfer(txbuf_dummy, SENSOR_MESSAGE_PACKET_LENGTH,
             data_out, SENSOR_MESSAGE_PACKET_LENGTH)) {
         hal.console->printf("HG1120: error reading from sensor\n");
