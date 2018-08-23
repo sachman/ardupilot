@@ -206,10 +206,16 @@ extern const AP_HAL::HAL& hal;
 #define HG1120_DRY_XG_PIN               -1
 #define SENSOR_MESSAGE_PACKET_LENGTH    51
 
+#define MUX_STATUS_WORD_COUNTER_MASK    0x000F
+
+#define MUX_WORD_TEMPERATURE_A_G        7
+
 //double _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
 //double _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
 float _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
 float _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+
+float temperature_A_G_HG1120;
 
 
 AP_InertialSensor_HG1120::AP_InertialSensor_HG1120(AP_InertialSensor &imu,
@@ -339,6 +345,7 @@ bool AP_InertialSensor_HG1120::parse_HonWlIMU_data(uint8_t *data_in) {
     int16_t helper_angularRate_X, helper_angularRate_Y, helper_angularRate_Z;
     int16_t helper_accel_X, helper_accel_Y, helper_accel_Z;
     int16_t helper_mag_X, helper_mag_Y, helper_mag_Z;
+    int16_t helper_temperature_A_G = 0;
 
     const uint16_t receivedCheckSum =
             ((imuMessage.spiCtrlMsgPacket.controlMessage.checkSum[1] << 8 ) |
@@ -403,6 +410,20 @@ bool AP_InertialSensor_HG1120::parse_HonWlIMU_data(uint8_t *data_in) {
            _mag_X = helper_mag_X * (0.438404);
            _mag_Y = helper_mag_Y * (0.438404);
            _mag_Z = helper_mag_Z * (0.438404);
+
+           _mux_status_word_counter =
+           ((imuMessage.spiCtrlMsgPacket.controlMessage.controlData.controlData.main_status_word[1] << 8) |
+             imuMessage.spiCtrlMsgPacket.controlMessage.controlData.controlData.main_status_word[0])
+                    &
+            MUX_STATUS_WORD_COUNTER_MASK;
+
+           if (_mux_status_word_counter == MUX_WORD_TEMPERATURE_A_G) {
+               helper_temperature_A_G =
+               ((imuMessage.spiCtrlMsgPacket.controlMessage.controlData.controlData.mux_status_word[1] << 8) |
+                 imuMessage.spiCtrlMsgPacket.controlMessage.controlData.controlData.mux_status_word[0]);
+
+               _temperature_a_g = (double)helper_temperature_A_G * (0.0039);
+           }
 
 //           error_count = 0;
            ++valid_packet_count;
@@ -506,6 +527,8 @@ void AP_InertialSensor_HG1120::_poll_data() {
    _accel_X_raw_HG1120 = _accel_X;
    _accel_Y_raw_HG1120 = _accel_Y;
    _accel_Z_raw_HG1120 = _accel_Z;
+
+   temperature_A_G_HG1120 = _temperature_a_g;
 
    /* This api has params in the order Y, X, Z for the copter  */
    Vector3f gyro_data(_angularRate_Z, -_angularRate_Y, //-raw_data.z);

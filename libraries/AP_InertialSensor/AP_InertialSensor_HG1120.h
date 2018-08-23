@@ -97,6 +97,9 @@ private:
     double _angularRate_X, _angularRate_Y, _angularRate_Z;
     double _accel_X, _accel_Y, _accel_Z;
     double _mag_X, _mag_Y, _mag_Z;
+    double _temperature_a_g;
+
+    uint16_t _mux_status_word_counter;
 
 
 

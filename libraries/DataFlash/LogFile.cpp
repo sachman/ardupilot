@@ -810,6 +810,7 @@ void DataFlash_Class::Log_Write_Baro(AP_Baro &baro, uint64_t time_us)
 //extern double _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
 extern float _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
 extern float _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+extern float temperature_A_G_HG1120;
 
 // Write an raw accel/gyro data packet
 void DataFlash_Class::Log_Write_IMU(const AP_InertialSensor &ins)
@@ -880,6 +881,7 @@ void DataFlash_Class::Log_Write_IMU(const AP_InertialSensor &ins)
         accel_x_raw : -_accel_Y_raw_HG1120,
         accel_y_raw : _accel_Z_raw_HG1120,
         accel_z_raw : -_accel_X_raw_HG1120,
+        temperature : temperature_A_G_HG1120,
         gyro_health : (uint8_t)ins.get_gyro_health(2),
         accel_health : (uint8_t)ins.get_accel_health(2),
         gyro_rate : ins.get_gyro_rate_hz(2),

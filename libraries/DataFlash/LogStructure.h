@@ -20,7 +20,8 @@ struct LogStructure {
     const char name[5];
 //    const char format[16];
     const char format[20];
-    const char labels[64];
+//    const char labels[64];
+    const char labels[70];
 };
 
 /*
@@ -94,6 +95,7 @@ struct PACKED log_IMU_HG1120 {
     float accel_x, accel_y, accel_z;
     float gyro_x_raw, gyro_y_raw, gyro_z_raw;
     float accel_x_raw, accel_y_raw, accel_z_raw;
+    float temperature;
     uint8_t gyro_health, accel_health;
     uint16_t gyro_rate, accel_rate;
 };
@@ -852,8 +854,8 @@ struct PACKED log_Beacon {
 #define IMU_LABELS "TimeUS,GyrX,GyrY,GyrZ,AccX,AccY,AccZ,EG,EA,T,GH,AH,GHz,AHz"
 #define IMU_FMT   "QffffffIIfBBHH"
 
-#define IMU_HG1120_LABELS "T_uS,GX,GY,GZ,AX,AY,AZ,GXr,GYr,GZr,AXr,AYr,AZr,GH,AH,GHz,AHz"
-#define IMU_HG1120_FMT   "QffffffffffffBBHH"
+#define IMU_HG1120_LABELS "T_uS,GX,GY,GZ,AX,AY,AZ,GXr,GYr,GZr,AXr,AYr,AZr,Temp,GH,AH,GHz,AHz"
+#define IMU_HG1120_FMT   "QfffffffffffffBBHH"
 
 //T_uS,GX,GY,GZ,AX,AY,AZ,GXr,GYr,GZr,AXr,AYr,AZr,GH,AH,GHz,AHz
 //1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8
