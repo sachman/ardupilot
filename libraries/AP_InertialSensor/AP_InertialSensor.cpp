@@ -717,20 +717,32 @@ AP_InertialSensor::detect_backends(void)
         break;
 
     case AP_BoardConfig::PX4_BOARD_PIXHAWK2:
-        // older Pixhawk2 boards have the MPU6000 instead of MPU9250
-        _fast_sampling_mask.set_default(1);
-        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_EXT_NAME), ROTATION_PITCH_180));
-        _add_backend(AP_InertialSensor_LSM9DS0::probe(*this,
-                                                      hal.spi->get_device(HAL_INS_LSM9DS0_EXT_G_NAME),
-                                                      hal.spi->get_device(HAL_INS_LSM9DS0_EXT_A_NAME),
-                                                      ROTATION_ROLL_180_YAW_270,
-                                                      ROTATION_ROLL_180_YAW_90,
-                                                      ROTATION_ROLL_180_YAW_90));
-        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_YAW_270));
-//        /* AUS: TODO - Rotation value?  */
+//        // older Pixhawk2 boards have the MPU6000 instead of MPU9250
+//        _fast_sampling_mask.set_default(1);
+//        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_EXT_NAME), ROTATION_PITCH_180));
+//        _add_backend(AP_InertialSensor_LSM9DS0::probe(*this,
+//                                                      hal.spi->get_device(HAL_INS_LSM9DS0_EXT_G_NAME),
+//                                                      hal.spi->get_device(HAL_INS_LSM9DS0_EXT_A_NAME),
+//                                                      ROTATION_ROLL_180_YAW_270,
+//                                                      ROTATION_ROLL_180_YAW_90,
+//                                                      ROTATION_ROLL_180_YAW_90));
+//        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_NAME), ROTATION_YAW_270));
+        /* AUS: TODO - Rotation value?  */
 //        _add_backend(AP_InertialSensor_HG1120::probe(*this, hal.spi->get_device(HAL_INS_HG1120_NAME), ROTATION_NONE));
-//        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU9250_BREAKOUT_NAME), ROTATION_NONE));
-        _add_backend(AP_InertialSensor_LSM9DS1::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_NONE));
+//        _add_backend(AP_InertialSensor_LSM9DS1::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_NONE));
+        /* AUS:
+         * Testing is being done on Pixhawk board. Hence sensor probing related changes
+         * are being appropriately done.
+         */
+        _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU60x0_NAME), ROTATION_ROLL_180));
+        _add_backend(AP_InertialSensor_LSM9DS0::probe(*this,
+                                                      hal.spi->get_device(HAL_INS_LSM9DS0_G_NAME),
+                                                      hal.spi->get_device(HAL_INS_LSM9DS0_A_NAME),
+                                                      ROTATION_ROLL_180,
+                                                      ROTATION_ROLL_180_YAW_270,
+                                                      ROTATION_PITCH_180));
+        /* AUS: HG1120 sensor is running in the name of LSM9DS1 breakout  */
+        _add_backend(AP_InertialSensor_HG1120::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_NONE));
         break;
 
     case AP_BoardConfig::PX4_BOARD_PIXRACER:
