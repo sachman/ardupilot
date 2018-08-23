@@ -206,6 +206,11 @@ extern const AP_HAL::HAL& hal;
 #define HG1120_DRY_XG_PIN               -1
 #define SENSOR_MESSAGE_PACKET_LENGTH    51
 
+//double _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
+//double _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+float _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
+float _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+
 
 AP_InertialSensor_HG1120::AP_InertialSensor_HG1120(AP_InertialSensor &imu,
                                                      AP_HAL::OwnPtr<AP_HAL::SPIDevice> dev,
@@ -493,6 +498,15 @@ void AP_InertialSensor_HG1120::_poll_data() {
 
 //   Vector3f gyro_data(_angularRate_X, _angularRate_Y, //-raw_data.z);
 //           _angularRate_Z);
+
+
+   _angularRate_X_raw_HG1120 = _angularRate_X;
+   _angularRate_Y_raw_HG1120 = _angularRate_Y;
+   _angularRate_Z_raw_HG1120 = _angularRate_Z;
+   _accel_X_raw_HG1120 = _accel_X;
+   _accel_Y_raw_HG1120 = _accel_Y;
+   _accel_Z_raw_HG1120 = _accel_Z;
+
    /* This api has params in the order Y, X, Z for the copter  */
    Vector3f gyro_data(_angularRate_Z, -_angularRate_Y, //-raw_data.z);
           -_angularRate_X);

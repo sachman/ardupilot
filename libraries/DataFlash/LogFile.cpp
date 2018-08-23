@@ -806,6 +806,11 @@ void DataFlash_Class::Log_Write_Baro(AP_Baro &baro, uint64_t time_us)
     }
 }
 
+//extern double _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
+//extern double _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+extern float _angularRate_X_raw_HG1120, _angularRate_Y_raw_HG1120, _angularRate_Z_raw_HG1120;
+extern float _accel_X_raw_HG1120, _accel_Y_raw_HG1120, _accel_Z_raw_HG1120;
+
 // Write an raw accel/gyro data packet
 void DataFlash_Class::Log_Write_IMU(const AP_InertialSensor &ins)
 {
@@ -859,7 +864,8 @@ void DataFlash_Class::Log_Write_IMU(const AP_InertialSensor &ins)
     }
     const Vector3f &gyro3 = ins.get_gyro(2);
     const Vector3f &accel3 = ins.get_accel(2);
-    struct log_IMU pkt3 = {
+//    struct log_IMU pkt3 = {
+    struct log_IMU_HG1120 pkt3 = {
         LOG_PACKET_HEADER_INIT(LOG_IMU3_MSG),
         time_us : time_us,
         gyro_x  : gyro3.x,
@@ -868,9 +874,12 @@ void DataFlash_Class::Log_Write_IMU(const AP_InertialSensor &ins)
         accel_x : accel3.x,
         accel_y : accel3.y,
         accel_z : accel3.z,
-        gyro_error  : ins.get_gyro_error_count(2),
-        accel_error : ins.get_accel_error_count(2),
-        temperature : ins.get_temperature(2),
+        gyro_x_raw : -_angularRate_Y_raw_HG1120,
+        gyro_y_raw : _angularRate_Z_raw_HG1120,
+        gyro_z_raw : -_angularRate_X_raw_HG1120,
+        accel_x_raw : -_accel_Y_raw_HG1120,
+        accel_y_raw : _accel_Z_raw_HG1120,
+        accel_z_raw : -_accel_X_raw_HG1120,
         gyro_health : (uint8_t)ins.get_gyro_health(2),
         accel_health : (uint8_t)ins.get_accel_health(2),
         gyro_rate : ins.get_gyro_rate_hz(2),

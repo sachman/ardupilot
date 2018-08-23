@@ -425,6 +425,13 @@ const AP_Param::GroupInfo AP_InertialSensor::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("FAST_SAMPLE",  36, AP_InertialSensor, _fast_sampling_mask,   0),
 
+    // @Param: GYRO_CAL_ENABLED_DEFAULT
+    // @DisplayName: Enable/Disable Control for calibration of IMU3 gyro
+    // @Description: 0:Disabled;1:Enabled
+    // @Range: 0 1
+    // @User: Advanced
+    AP_GROUPINFO("IMU3GYRCL_EN", 37, AP_InertialSensor, _imu3_gyro_cal_enabled,  IMU3_GYRO_CAL_ENABLED_DEFAULT),
+
     /*
       NOTE: parameter indexes have gaps above. When adding new
       parameters check for conflicts carefully
@@ -1046,6 +1053,13 @@ AP_InertialSensor::_init_gyro()
     Vector3f new_gyro_offset[INS_MAX_INSTANCES];
     float best_diff[INS_MAX_INSTANCES];
     bool converged[INS_MAX_INSTANCES];
+
+    /* AUS:
+     * To regulate the calibration of IMU3 gyro
+     */
+    if (!_imu3_gyro_cal_enabled) {
+        num_gyros -= 1;
+    }
 
     // exit immediately if calibration is already in progress
     if (_calibrating) {

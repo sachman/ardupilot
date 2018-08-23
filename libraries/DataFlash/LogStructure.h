@@ -18,7 +18,8 @@ struct LogStructure {
     uint8_t msg_type;
     uint8_t msg_len;
     const char name[5];
-    const char format[16];
+//    const char format[16];
+    const char format[20];
     const char labels[64];
 };
 
@@ -82,6 +83,17 @@ struct PACKED log_IMU {
     float accel_x, accel_y, accel_z;
     uint32_t gyro_error, accel_error;
     float temperature;
+    uint8_t gyro_health, accel_health;
+    uint16_t gyro_rate, accel_rate;
+};
+
+struct PACKED log_IMU_HG1120 {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    float gyro_x, gyro_y, gyro_z;
+    float accel_x, accel_y, accel_z;
+    float gyro_x_raw, gyro_y_raw, gyro_z_raw;
+    float accel_x_raw, accel_y_raw, accel_z_raw;
     uint8_t gyro_health, accel_health;
     uint16_t gyro_rate, accel_rate;
 };
@@ -840,6 +852,12 @@ struct PACKED log_Beacon {
 #define IMU_LABELS "TimeUS,GyrX,GyrY,GyrZ,AccX,AccY,AccZ,EG,EA,T,GH,AH,GHz,AHz"
 #define IMU_FMT   "QffffffIIfBBHH"
 
+#define IMU_HG1120_LABELS "T_uS,GX,GY,GZ,AX,AY,AZ,GXr,GYr,GZr,AXr,AYr,AZr,GH,AH,GHz,AHz"
+#define IMU_HG1120_FMT   "QffffffffffffBBHH"
+
+//T_uS,GX,GY,GZ,AX,AY,AZ,GXr,GYr,GZr,AXr,AYr,AZr,GH,AH,GHz,AHz
+//1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8
+
 #define MAG_LABELS "TimeUS,MagX,MagY,MagZ,OfsX,OfsY,OfsZ,MOfsX,MOfsY,MOfsZ,Health,S"
 #define MAG_FMT   "QhhhhhhhhhBI"
 
@@ -938,8 +956,8 @@ Format characters in the format string for binary log messages
 #define LOG_EXTRA_STRUCTURES \
     { LOG_IMU2_MSG, sizeof(log_IMU), \
       "IMU2",  IMU_FMT,     IMU_LABELS }, \
-    { LOG_IMU3_MSG, sizeof(log_IMU), \
-      "IMU3",  IMU_FMT,     IMU_LABELS }, \
+    { LOG_IMU3_MSG, sizeof(log_IMU_HG1120), \
+      "IMU3",  IMU_HG1120_FMT,     IMU_HG1120_LABELS }, \
     { LOG_AHR2_MSG, sizeof(log_AHRS), \
       "AHR2","QccCfLLffff","TimeUS,Roll,Pitch,Yaw,Alt,Lat,Lng,Q1,Q2,Q3,Q4" }, \
     { LOG_POS_MSG, sizeof(log_POS), \

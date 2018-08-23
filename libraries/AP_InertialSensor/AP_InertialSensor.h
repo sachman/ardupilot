@@ -8,6 +8,9 @@
 #define AP_INERTIAL_SENSOR_ACCEL_VIBE_FILT_HZ           2.0f    // accel vibration filter hz
 #define AP_INERTIAL_SENSOR_ACCEL_PEAK_DETECT_TIMEOUT_MS 500     // peak-hold detector timeout
 
+/* Calibration for IMU3 enabled, by default  */
+#define IMU3_GYRO_CAL_ENABLED_DEFAULT    1
+
 /**
    maximum number of INS instances available on this platform. If more
    than 1 then redundant sensors may be available
@@ -479,4 +482,7 @@ private:
     uint32_t _gyro_startup_error_count[INS_MAX_INSTANCES];
     bool _startup_error_counts_set;
     uint32_t _startup_ms;
+
+    // To enable/disable gyro calibration of IMU3
+    AP_Int8 _imu3_gyro_cal_enabled;
 };
