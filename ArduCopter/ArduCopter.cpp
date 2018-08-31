@@ -387,6 +387,17 @@ void Copter::fourhundred_hz_logging()
     if (should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_Attitude();
     }
+
+   /* AUS: Enabling EKF logging at a higher rate  */
+    if (should_log(MASK_LOG_ATTITUDE_FAST)) {
+        Log_Write_EKF_POS();
+    }
+
+    /* AUS: Increasing the rate of logging of IMUs  */
+    // log IMU data if we're not already logging at the lower rate
+    if (should_log(MASK_LOG_IMU_FAST) && !should_log(MASK_LOG_IMU)) {
+        DataFlash.Log_Write_IMU(ins);
+    }
 }
 
 // ten_hz_logging_loop
@@ -435,12 +446,15 @@ void Copter::twentyfive_hz_logging()
 #endif
 
 #if HIL_MODE == HIL_MODE_DISABLED
+/* AUS: Disabling EKF logging for everything but 400Hz  */
+#if 0
     if (should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_EKF_POS();
     }
-
+#endif
     // log IMU data if we're not already logging at the higher rate
-    if (should_log(MASK_LOG_IMU) && !should_log(MASK_LOG_IMU_RAW)) {
+    if (should_log(MASK_LOG_IMU) && !should_log(MASK_LOG_IMU_RAW)
+       /* AUS */ && !should_log(MASK_LOG_IMU_FAST)) {
         DataFlash.Log_Write_IMU(ins);
     }
 #endif
