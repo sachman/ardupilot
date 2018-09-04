@@ -956,10 +956,10 @@ Format characters in the format string for binary log messages
 
 // messages for more advanced boards
 #define LOG_EXTRA_STRUCTURES \
-    { LOG_IMU2_MSG, sizeof(log_IMU), \
-      "IMU2",  IMU_FMT,     IMU_LABELS }, \
-    { LOG_IMU3_MSG, sizeof(log_IMU_HG1120), \
-      "IMU3",  IMU_HG1120_FMT,     IMU_HG1120_LABELS }, \
+    { LOG_IMU2_MSG, sizeof(log_IMU_HG1120), \
+      "IMU2",  IMU_HG1120_FMT,     IMU_HG1120_LABELS }, \
+    { LOG_IMU3_MSG, sizeof(log_IMU), \
+      "IMU3",  IMU_FMT,     IMU_LABELS }, \
     { LOG_AHR2_MSG, sizeof(log_AHRS), \
       "AHR2","QccCfLLffff","TimeUS,Roll,Pitch,Yaw,Alt,Lat,Lng,Q1,Q2,Q3,Q4" }, \
     { LOG_POS_MSG, sizeof(log_POS), \

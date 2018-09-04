@@ -735,6 +735,7 @@ AP_InertialSensor::detect_backends(void)
          * are being appropriately done.
          */
         _add_backend(AP_InertialSensor_Invensense::probe(*this, hal.spi->get_device(HAL_INS_MPU60x0_NAME), ROTATION_ROLL_180));
+        _add_backend(AP_InertialSensor_HG1120::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_YAW_180));
         _add_backend(AP_InertialSensor_LSM9DS0::probe(*this,
                                                       hal.spi->get_device(HAL_INS_LSM9DS0_G_NAME),
                                                       hal.spi->get_device(HAL_INS_LSM9DS0_A_NAME),
@@ -742,7 +743,7 @@ AP_InertialSensor::detect_backends(void)
                                                       ROTATION_ROLL_180_YAW_270,
                                                       ROTATION_PITCH_180));
         /* AUS: HG1120 sensor is running in the name of LSM9DS1 breakout  */
-        _add_backend(AP_InertialSensor_HG1120::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_NONE));
+//        _add_backend(AP_InertialSensor_HG1120::probe(*this, hal.spi->get_device(HAL_INS_LSM9DS1_AG_BREAKOUT_NAME), ROTATION_NONE));
         break;
 
     case AP_BoardConfig::PX4_BOARD_PIXRACER:

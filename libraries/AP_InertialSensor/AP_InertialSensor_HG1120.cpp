@@ -530,16 +530,18 @@ void AP_InertialSensor_HG1120::_poll_data() {
 
    temperature_A_G_HG1120 = _temperature_a_g;
 
-   /* This api has params in the order Y, X, Z for the copter  */
-   Vector3f gyro_data(_angularRate_Z, -_angularRate_Y, //-raw_data.z);
+//   /* This api has params in the order Y, X, Z for the copter  */
+//   Vector3f gyro_data(_angularRate_Z, -_angularRate_Y, //-raw_data.z);
+//          -_angularRate_X);
+   Vector3f gyro_data(-_angularRate_Y, _angularRate_Z, //-raw_data.z);
           -_angularRate_X);
    _rotate_and_correct_gyro(_gyro_instance, gyro_data);
    _notify_new_gyro_raw_sample(_gyro_instance, gyro_data);
 
-//   Vector3f accel_data(_accel_X, _accel_Y, //-raw_data.z);
-//           _accel_Z);
-   /* This api has params in the order Y, X, Z for the copter  */
-   Vector3f accel_data(_accel_Z, -_accel_Y, //-raw_data.z);
+//   /* This api has params in the order Y, X, Z for the copter  */
+//   Vector3f accel_data(_accel_Z, -_accel_Y, //-raw_data.z);
+//          -_accel_X);
+   Vector3f accel_data(-_accel_Y, _accel_Z, //-raw_data.z);
           -_accel_X);
    _rotate_and_correct_accel(_accel_instance, accel_data);
    _notify_new_accel_raw_sample(_accel_instance, accel_data);

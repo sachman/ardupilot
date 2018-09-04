@@ -388,16 +388,22 @@ void Copter::fourhundred_hz_logging()
         Log_Write_Attitude();
     }
 
-   /* AUS: Enabling EKF logging at a higher rate  */
-    if (should_log(MASK_LOG_ATTITUDE_FAST)) {
-        Log_Write_EKF_POS();
-    }
+    static uint8_t hundred_hz_counter = 0;
+   /* AUS: For 100 Hz logging rate  */
+   if (hundred_hz_counter%4 == 0) {
+        /* AUS: Enabling EKF logging at a higher rate  */
+        if (should_log(MASK_LOG_ATTITUDE_FAST)) {
+            Log_Write_EKF_POS();
+        }
 
-    /* AUS: Increasing the rate of logging of IMUs  */
-    // log IMU data if we're not already logging at the lower rate
-    if (should_log(MASK_LOG_IMU_FAST) && !should_log(MASK_LOG_IMU)) {
-        DataFlash.Log_Write_IMU(ins);
+        /* AUS: Increasing the rate of logging of IMUs  */
+        // log IMU data if we're not already logging at the lower rate
+        if (should_log(MASK_LOG_IMU_FAST) && !should_log(MASK_LOG_IMU)) {
+            DataFlash.Log_Write_IMU(ins);
+        }
+
     }
+    ++hundred_hz_counter;
 }
 
 // ten_hz_logging_loop
