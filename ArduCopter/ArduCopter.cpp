@@ -298,35 +298,135 @@ bool Copter::sendAT_waitResponse_timeout(const char *txbuf, uint32_t txcount,
 void Copter::simTracking_update(void) {
     static bool init_isDone = false;
     bool ret;
-//    int i;
+    int i;
 
-    char send_buff[500];
-    char receive_buff[500];
+    char send_buff[300];
+    char receive_buff[300];
+    char helper_buff[300];
     uint32_t txcount = 0;
     int timeout = 2000;
+    static float floatCount = 0.0;
 
     if (!init_isDone) {
         init_isDone = true;
         hal.uartD->begin(115200);
 
-//        /* Attempt communication with GSM 5 times before quitting  */
-//        for (i=0; i<5; i++) {
-//            /* Check basic communication with the GSM module  */
-//            strncpy(send_buff, "AT\r", 3);
-//            txcount = strlen(send_buff);
-//            ret = sendAT_waitResponse_timeout(send_buff, txcount,
-//                                              receive_buff, timeout);
-//            if (ret) {
-//                gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
-//                break;
-//            }
-//
-//            hal.scheduler->delay(50);
-//        }
+        /* Attempt communication with GSM 5 times before quitting  */
+        for (i=0; i<5; i++) {
+            /* Check basic communication with the GSM module  */
+            sprintf(send_buff, "AT\r");
+            txcount = strlen(send_buff);
+            ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                              receive_buff, timeout);
+            if (ret) {
+                gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+                break;
+            }
+
+            hal.scheduler->delay(50);
+        }
+
+        /* Check signal strength  */
+        sprintf(send_buff, "AT+CSQ\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        /* Check network status  */
+        sprintf(send_buff, "AT+CREG?\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        sprintf(send_buff, "AT+CGREG?\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        /* Check the operator  */
+        sprintf(send_buff, "AT+COPS?\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        /* Define parameters of PDP context  */
+        sprintf(send_buff, "AT+CGSOCKCONT=1,\"IP\",\"jionet\"\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        hal.scheduler->delay(1000);
+
+        /* Ensure the PDP context has gotten IP address  */
+        sprintf(send_buff, "AT+CGPADDR\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        /* Init module's HTTP framework  */
+        sprintf(send_buff, "AT+HTTPINIT\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+
+        /* Set HTTP params for HTTP transaction  */
+        sprintf(send_buff,
+                "AT+HTTPPARA=\"URL\",\"http://demo.thingsboard.io/api/v1/YgjZhk3bbjCrG1IeWULw/telemetry\"\r"
+                );
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
     }
 
-    /* Check basic communication with the GSM module  */
-    memcpy(send_buff, "AT\r\0", 4);
+    /* Set HTTP data to be sent  */
+    floatCount += 1.0;
+    sprintf(helper_buff,
+            "{\"temperature\": %4.9f}\r", floatCount);
+    sprintf(send_buff,
+            "AT+HTTPDATA=%d,500\r", strlen(helper_buff));
+    txcount = strlen(send_buff);
+    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                      receive_buff, timeout);
+    if (ret) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+    }
+
+    sprintf(send_buff,
+            "{\"temperature\": %4.9f}\r", floatCount);
+    txcount = strlen(send_buff);
+    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                      receive_buff, timeout);
+    if (ret) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+    }
+
+    /* Send HTTP POST request to actually send data  */
+    sprintf(send_buff,
+            "AT+HTTPACTION=1\r");
     txcount = strlen(send_buff);
     ret = sendAT_waitResponse_timeout(send_buff, txcount,
                                       receive_buff, timeout);
