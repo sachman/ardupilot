@@ -706,6 +706,9 @@ private:
     void init_proximity();
     void update_proximity();
     void stats_update();
+    void simTracking_update();
+    bool sendAT_waitResponse_timeout(const char *txbuf, uint32_t txcount,
+                                     char *rxbuf, int timeout);
     void init_beacon();
     void update_beacon();
     void init_visual_odom();

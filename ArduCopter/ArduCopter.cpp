@@ -159,6 +159,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(button_update,          5,    100),
     SCHED_TASK(stats_update,           1,    100),
+    SCHED_TASK(simTracking_update,           0.2,    2000),
 };
 
 
@@ -175,6 +176,9 @@ void Copter::setup()
     init_ardupilot();
 
     camera.switch_off();
+
+    /* To ensure that GSM module gets ready for operation  */
+    hal.scheduler->delay(2000);
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks));
@@ -223,6 +227,112 @@ void Copter::perf_update(void)
 void Copter::stats_update(void)
 {
     g2.stats.update();
+}
+
+/*
+ * Check if complete response from the GSM module is received.
+ */
+static bool atResponse_getStatus(char const *str)
+{
+    char const *p = str;
+    int count;
+    for (count = 0; ; ++count) {
+        p = strstr(p, "\r\n");
+        if (!p)
+            break;
+        p++;
+    }
+    return (count == 2)? true: false;
+}
+
+/*
+ * Send AT command and fetch response.
+ */
+bool Copter::sendAT_waitResponse_timeout(const char *txbuf, uint32_t txcount,
+                                         char *rxbuf, int timeout) {
+    int time_passed = 0;
+    int32_t bytes_available = 0;
+    uint64_t waitStart_millis = 0;
+    bool responseComplete = false;
+    int32_t bytes_read = 0;
+    int32_t i = 0;
+
+    /* Flush all previous messages from the GSM module */
+    while (hal.uartD->read() != -1) {}
+
+    /* Send the AT command  */
+    hal.uartD->write((uint8_t *)txbuf, txcount);
+
+    /* Wait for Response till timeout  */
+    time_passed = 0;
+    bytes_read = 0;
+    waitStart_millis = AP_HAL::millis64();
+    while ((time_passed <= timeout) && (!responseComplete)) {
+        time_passed = AP_HAL::millis64() - waitStart_millis;
+        bytes_available = hal.uartD->available();
+        if (!bytes_available)
+            continue;
+        for (i = 0; i < bytes_available; i++) {
+            rxbuf[bytes_read+i] = hal.uartD->read();
+        }
+        bytes_read += i;
+        responseComplete = atResponse_getStatus(rxbuf);
+    }
+    /* Check if timeout had occurred  */
+    if (time_passed >= timeout) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "No response received from GSM\r\n");
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "Ending this GSM transaction\r\n");
+        return false;
+    }
+
+    /* Add string termination to the response received  */
+    memcpy(rxbuf+bytes_read, "\0", 1);
+
+    /* Success  */
+    return true;
+}
+
+/*
+ * Update GPS location on server through GSM module.
+ */
+void Copter::simTracking_update(void) {
+    static bool init_isDone = false;
+    bool ret;
+//    int i;
+
+    char send_buff[500];
+    char receive_buff[500];
+    uint32_t txcount = 0;
+    int timeout = 2000;
+
+    if (!init_isDone) {
+        init_isDone = true;
+        hal.uartD->begin(115200);
+
+//        /* Attempt communication with GSM 5 times before quitting  */
+//        for (i=0; i<5; i++) {
+//            /* Check basic communication with the GSM module  */
+//            strncpy(send_buff, "AT\r", 3);
+//            txcount = strlen(send_buff);
+//            ret = sendAT_waitResponse_timeout(send_buff, txcount,
+//                                              receive_buff, timeout);
+//            if (ret) {
+//                gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+//                break;
+//            }
+//
+//            hal.scheduler->delay(50);
+//        }
+    }
+
+    /* Check basic communication with the GSM module  */
+    memcpy(send_buff, "AT\r\0", 4);
+    txcount = strlen(send_buff);
+    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                      receive_buff, timeout);
+    if (ret) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+    }
 }
 
 void Copter::loop()
