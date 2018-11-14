@@ -246,6 +246,27 @@ static bool atResponse_getStatus(char const *str)
 }
 
 /*
+ * Find the pointer to the nth occurrence of a substring in a string.
+ */
+static char* findStr_nthOccurrence(char *str, char const *substr, uint32_t n)
+{
+    char *p = str;
+    int count = 0;
+    if (!n)
+        return NULL;
+    for (;;) {
+        p = strstr(p, substr);
+        if (!p)
+            break;
+        count++;
+        if (count == n)
+            break;
+        p++;
+    }
+    return p;
+}
+
+/*
  * Send AT command and fetch response.
  */
 bool Copter::sendAT_waitResponse_timeout(const char *txbuf, uint32_t txcount,
@@ -305,7 +326,14 @@ void Copter::simTracking_update(void) {
     char helper_buff[300];
     uint32_t txcount = 0;
     int timeout = 2000;
-    static float floatCount = 0.0;
+//    static float floatCount = 0.0;
+    char *p = NULL;
+    char *p1 = NULL;
+    char *p2 = NULL;
+    char helper_string[50];
+
+    int8_t gps_fix_type = 0;
+    float latitude, longitude, height;
 
     if (!init_isDone) {
         init_isDone = true;
@@ -400,12 +428,114 @@ void Copter::simTracking_update(void) {
         if (ret) {
             gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
         }
+
+
+        /* Turn on GPS in the GSM module */
+        sprintf(send_buff, "AT+CGPS=1,1\r");
+        txcount = strlen(send_buff);
+        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                          receive_buff, timeout);
+        if (ret) {
+            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        }
+//
+//        /* Turn on all GNSS in GSM module */
+//        sprintf(send_buff, "AT+CGNSSMODE=15,1\r");
+//        txcount = strlen(send_buff);
+//        ret = sendAT_waitResponse_timeout(send_buff, txcount,
+//                                          receive_buff, timeout);
+//        if (ret) {
+//            gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+//        }
+
     }
 
+    /******** Fetch Latitude, Longitude and Height from GPS of GSM module  ***********/
+    sprintf(send_buff, "AT+CGNSSINFO\r");
+    txcount = strlen(send_buff);
+    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+                                      receive_buff, timeout);
+    gps_fix_type = 0;
+    if (ret) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+        /* Fetch Fix Type  */
+        p = strstr(receive_buff, "+CGNSSINFO:");
+        /* Check if GPS fix is 2D or 3D  */
+        if ((*(p+12) == '2')) {
+            gps_fix_type = 2;
+        }
+        else if ((*(p+12) == '3'))  {
+            gps_fix_type = 3;
+        }
+        else {
+            gps_fix_type = 0;
+        }
+    }
+
+    if (!gps_fix_type) {
+        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: No GPS Fix\r\n");
+        return;
+    }
+
+    /* Latitude is 5th item in the info list */
+    p1 = findStr_nthOccurrence(p, ",", 4);
+    p2 = findStr_nthOccurrence(p, ",", 5);
+    snprintf(helper_string, (p2-p1)+1, "%s", p1+1);
+    latitude = atof(helper_string)/100.0;
+
+    /* Longitude is 7th item in the info list */
+    p1 = findStr_nthOccurrence(p, ",", 6);
+    p2 = findStr_nthOccurrence(p, ",", 7);
+    snprintf(helper_string, (p2-p1)+1, "%s", p1+1);
+    longitude = atof(helper_string)/100.0;
+
+    /* Height is 11th item in the info list */
+    p1 = findStr_nthOccurrence(p, ",", 10);
+    p2 = findStr_nthOccurrence(p, ",", 11);
+    snprintf(helper_string, (p2-p1)+1, "%s", p1+1);
+    height = atof(helper_string);
+
+
+//    /*********** Send Dummy Test data *****************/
+//    /* Set HTTP data to be sent  */
+//    floatCount += 1.0;
+//    sprintf(helper_buff,
+//            "{\"temperature\": %4.9f}\r", floatCount);
+//    sprintf(send_buff,
+//            "AT+HTTPDATA=%d,500\r", strlen(helper_buff));
+//    txcount = strlen(send_buff);
+//    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+//                                      receive_buff, timeout);
+//    if (ret) {
+//        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+//    }
+//
+//    sprintf(send_buff,
+//            "{\"temperature\": %4.9f}\r", floatCount);
+//    txcount = strlen(send_buff);
+//    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+//                                      receive_buff, timeout);
+//    if (ret) {
+//        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+//    }
+//
+//    /* Send HTTP POST request to actually send data  */
+//    sprintf(send_buff,
+//            "AT+HTTPACTION=1\r");
+//    txcount = strlen(send_buff);
+//    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+//                                      receive_buff, timeout);
+//    if (ret) {
+//        gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
+//    }
+
+
+
+    /*********** Send GPS Fix type, Lat, Lon, Height data *****************/
     /* Set HTTP data to be sent  */
-    floatCount += 1.0;
     sprintf(helper_buff,
-            "{\"temperature\": %4.9f}\r", floatCount);
+            "{\"GPS_Fix_Type\": %d, \"latitude\": %4.9f, \"longitude\": %4.9f, \"height\": %4.9f}",
+            gps_fix_type, latitude, longitude, height);
     sprintf(send_buff,
             "AT+HTTPDATA=%d,500\r", strlen(helper_buff));
     txcount = strlen(send_buff);
@@ -415,10 +545,10 @@ void Copter::simTracking_update(void) {
         gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
     }
 
-    sprintf(send_buff,
-            "{\"temperature\": %4.9f}\r", floatCount);
-    txcount = strlen(send_buff);
-    ret = sendAT_waitResponse_timeout(send_buff, txcount,
+    /* Delay to wait for DOWNLOAD response from GSM  */
+    hal.scheduler->delay(50);
+
+    ret = sendAT_waitResponse_timeout(helper_buff, strlen(helper_buff),
                                       receive_buff, timeout);
     if (ret) {
         gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
@@ -433,6 +563,8 @@ void Copter::simTracking_update(void) {
     if (ret) {
         gcs_send_text_fmt(MAV_SEVERITY_WARNING, "GSM: %s\r\n", receive_buff);
     }
+
+
 }
 
 void Copter::loop()
