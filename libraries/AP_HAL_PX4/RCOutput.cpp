@@ -314,17 +314,43 @@ void PX4RCOutput::force_safety_no_wait(void)
     }
 }
 
+extern bool StrobeLights_InUse;
 void PX4RCOutput::write(uint8_t ch, uint16_t period_us)
 {
     if (ch >= PX4_NUM_OUTPUT_CHANNELS) {
         return;
     }
+
+    /* AUS: Hack to avoid conflicts with Strobe Light(s) on Channel 5 */
+    if ((ch == 5) && (!StrobeLights_InUse)) {
+        return;
+    }
+
     if (!(_enabled_channels & (1U<<ch))) {
         // not enabled
         return;
     }
     if (ch >= _max_channel) {
         _max_channel = ch + 1;
+    }
+
+    /* AUS: Hack to avoid conflicts with Strobe Light(s) on Channel 5 */
+    if (ch == 5) {
+        if (period_us)
+            period_us = 60000;
+        else
+            period_us = 0;
+        /*
+          only mark an update is needed if there has been a change, or we
+          are in oneshot mode. In oneshot mode we always need to send the
+          output
+         */
+        if (period_us != _period[ch] ||
+            _output_mode == MODE_PWM_ONESHOT) {
+            _period[ch] = period_us;
+            _need_update = true;
+        }
+        return;
     }
 
     if (_output_mode == MODE_PWM_BRUSHED16KHZ) {

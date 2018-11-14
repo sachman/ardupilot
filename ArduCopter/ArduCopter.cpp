@@ -159,6 +159,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(button_update,          5,    100),
     SCHED_TASK(stats_update,           1,    100),
+    SCHED_TASK(strobe_lights_update,    100,    1000),
 };
 
 
@@ -223,6 +224,116 @@ void Copter::perf_update(void)
 void Copter::stats_update(void)
 {
     g2.stats.update();
+}
+
+#define STROBE_LIGHTS_RCOUTCHANNEL              5
+#define STROBE_LIGHTS_DUTYCYCLE_MIN             0
+#define STROBE_LIGHTS_DUTYCYCLE_MAX             2200
+#define STROBE_STAGE_1      1
+#define STROBE_STAGE_2      2
+#define STROBE_STAGE_3      3
+#define STROBE_STAGE_4      4
+#define STROBE_STAGE_5      5
+#define STROBE_STAGE_6      6
+
+#define STROBING_CYCLE_TIME_MS          700
+#define STROBE_STAGE_1_THRSHLD_TIME_MS  25
+#define STROBE_STAGE_2_THRSHLD_TIME_MS  50
+#define STROBE_STAGE_3_THRSHLD_TIME_MS  25
+#define STROBE_STAGE_4_THRSHLD_TIME_MS  50
+#define STROBE_STAGE_5_THRSHLD_TIME_MS  25
+#define STROBE_STAGE_6_THRSHLD_TIME_MS  (STROBING_CYCLE_TIME_MS -           \
+                                        (STROBE_STAGE_1_THRSHLD_TIME_MS+    \
+                                         STROBE_STAGE_2_THRSHLD_TIME_MS+    \
+                                         STROBE_STAGE_3_THRSHLD_TIME_MS+    \
+                                         STROBE_STAGE_4_THRSHLD_TIME_MS+    \
+                                         STROBE_STAGE_5_THRSHLD_TIME_MS))
+bool StrobeLights_InUse = false;
+void Copter::strobe_lights_update(void) {
+    static bool init_isDone = false;
+    static uint16_t strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MIN;
+    static uint16_t strobe_light_dutyCycle_previous = STROBE_LIGHTS_DUTYCYCLE_MIN;
+    static uint8_t strobe_stage = STROBE_STAGE_1;
+    static uint64_t millis_previous_stageChange = 0;
+
+    if (!init_isDone) {
+        hal.console->printf("Starting Strobe Lights\n");
+        hal.rcout->enable_ch(STROBE_LIGHTS_RCOUTCHANNEL);
+        init_isDone = true;
+    }
+
+    switch (strobe_stage) {
+    case STROBE_STAGE_1:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_1_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_2;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    case STROBE_STAGE_2:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_2_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_3;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    case STROBE_STAGE_3:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_3_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_4;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    case STROBE_STAGE_4:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_4_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_5;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    case STROBE_STAGE_5:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_5_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_6;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    case STROBE_STAGE_6:
+        if (AP_HAL::millis64() - millis_previous_stageChange >=
+                STROBE_STAGE_6_THRSHLD_TIME_MS) {
+            strobe_stage = STROBE_STAGE_1;
+            millis_previous_stageChange = AP_HAL::millis64();
+        }
+        break;
+    }
+
+    switch (strobe_stage) {
+    case STROBE_STAGE_1:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MAX;
+        break;
+    case STROBE_STAGE_2:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MIN;
+        break;
+    case STROBE_STAGE_3:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MAX;
+        break;
+    case STROBE_STAGE_4:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MIN;
+        break;
+    case STROBE_STAGE_5:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MAX;
+        break;
+    case STROBE_STAGE_6:
+        strobe_lights_dutyCycle = STROBE_LIGHTS_DUTYCYCLE_MIN;
+        break;
+    }
+
+    if (strobe_lights_dutyCycle != strobe_light_dutyCycle_previous) {
+        StrobeLights_InUse = true;
+        hal.rcout->write(STROBE_LIGHTS_RCOUTCHANNEL, strobe_lights_dutyCycle);
+        StrobeLights_InUse = false;
+        strobe_light_dutyCycle_previous = strobe_lights_dutyCycle;
+    }
 }
 
 void Copter::loop()

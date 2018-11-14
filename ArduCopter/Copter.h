@@ -706,6 +706,7 @@ private:
     void init_proximity();
     void update_proximity();
     void stats_update();
+    void strobe_lights_update();
     void init_beacon();
     void update_beacon();
     void init_visual_odom();
